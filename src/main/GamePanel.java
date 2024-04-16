@@ -161,7 +161,6 @@ public class GamePanel extends JPanel {
 		} 
 		catch ( NullPointerException ignored) { }
 	}
-
 	
 	private void switchMode() {
 		
