@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
+import entities.Entity;
 import entities.Explosion;
 import main.GamePanel;
 import main.KeyHandler;
@@ -41,11 +42,13 @@ public class Throwable extends Item{
 	void toss() {
 		int x = gp.getMousePosOnMap().x;
 		int y = gp.getMousePosOnMap().y;
+		keyH.m1 = false;
 		int w = 20;
 		Explosion e = new Explosion(x, y, w ,damage, gp,keyH);
 		System.out.println("EXPLOSION!!!");
-		gp.colC.checkDamage(e, gp.e1);
-		keyH.m1 = false;
+		for(Entity entity: gp.entityManager.entityList) {
+			gp.colC.checkDamage(e, entity);
+		}
 	}
 
 	public void update() {

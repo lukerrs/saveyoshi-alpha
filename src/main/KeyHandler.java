@@ -95,4 +95,7 @@ public class KeyHandler implements KeyListener, MouseListener, MouseWheelListene
 	public void mouseWheelMoved(MouseWheelEvent e) {
 		mouseWheelRotation = e.getPreciseWheelRotation();
 	}
+
+	public void keyReleased(int vkR) {
+	}
 }

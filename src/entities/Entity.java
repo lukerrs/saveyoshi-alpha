@@ -53,23 +53,29 @@ public abstract class Entity {
 	public boolean isMoving = false;
 	public ItemManager inv;
 	public boolean isAlive;
+	public boolean isHostile;
 	final GamePanel gp;
 	final KeyHandler keyH;
 
-	public Entity(GamePanel gp, KeyHandler keyH) {
+	public Entity(GamePanel gp, KeyHandler keyH)
+	{
 		this.gp = gp;
 		this.keyH = keyH;
+		isAlive = true;
 	}
 
-	protected synchronized void drawShadow(Entity entity, Graphics2D g2) {
+	protected synchronized void drawShadow(Entity entity, Graphics2D g2)
+	{
 		g2.setColor(new Color(0.0F, 0.0F, 0.0F, 0.3F));
 		g2.fillOval(entity.screenX + entity.hitbox.x,
 				entity.screenY + entity.hitbox.y + entity.hitbox.height - entity.hitbox.height / 4, entity.hitbox.width,
 				entity.hitbox.height / 2);
 	}
 
-	public synchronized void drawHealthbar(Entity entity, Graphics2D g2) {
-		if(isAlive) {
+	public synchronized void drawHealthbar(Entity entity, Graphics2D g2)
+	{
+		if(isAlive)
+		{
 			int x = (int) (entity.screenX + entity.hitbox.x + entity.hitbox.width/2 - (entity.healthMax / 4)*gp.scale);
 			int y = (int) (entity.screenY - 25*gp.scale/2);
 			int w = (int) (entity.health*gp.scale/2);
@@ -98,6 +104,7 @@ public abstract class Entity {
 	protected synchronized void die()
 	{
 		isAlive = false;
+		gp.entityManager.entityList.remove(this);
 	}
 
 	protected synchronized void spriteCounter(int num) {

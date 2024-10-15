@@ -89,6 +89,8 @@ public class ItemManager {
 								hotbarBoxSize - imageOffset * 2,
 								null);
 					}
+
+					
 				}
 				break;
 			case 11:

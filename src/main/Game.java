@@ -11,7 +11,8 @@ import java.util.Objects;
 import javax.swing.*;
 import javax.imageio.ImageIO;
 
-public class Game {
+public class Game
+{
 	public String title;
 	public String version;
 	public JFrame window;
@@ -24,7 +25,8 @@ public class Game {
         JOptionPane.showMessageDialog( new ScrollPane(1), infoMessage,titleBar, JOptionPane.ERROR_MESSAGE);
     }
 	
-	public static void main(String[] args) {
+	public static void main(String[] args)
+	{
 		new Game("Save Yoshi!");
 	}
 
@@ -33,7 +35,8 @@ public class Game {
 		init(title);
 	}
 	
-	private void init(String title) {
+	private void init(String title)
+	{
 		this.title = title;
 		version = "0.1.4";
 
@@ -50,13 +53,13 @@ public class Game {
 		window.setVisible(true);
 		window.add(gamePanel);
 		window.pack();
-		Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-				new BufferedImage(16, 16, 2),new Point(0, 0), "blank cursor");
-		window.getContentPane().setCursor(blankCursor);
-
+		//Cursor blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
+		//		new BufferedImage(16, 16, 2),new Point(0, 0), "blank cursor");
+		//window.getContentPane().setCursor(blankCursor);
 	}
 	
-	private void loadImageFiles() {
+	private void loadImageFiles()
+	{
 		try {
 			icon = ImageIO.read(Objects.requireNonNull(getClass().getResource("/program/icon.png")));
 			System.out.println("Success: Successfully loaded program resources");

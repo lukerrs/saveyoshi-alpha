@@ -1,9 +1,6 @@
 package main;
 
-import entities.Companion;
-import entities.Enemy;
-import entities.Entity;
-import entities.Player;
+import entities.*;
 import menu.Menu;
 
 import java.awt.BasicStroke;
@@ -49,8 +46,8 @@ public class GamePanel extends JPanel {
 	public Game game;
 	public Camera cam;
 	public Menu menu;
-	public List<Entity> entityList;
-	public ArrayList<Entity> entityArrayList;
+	public EntityManager entityManager;
+
 	public SoundPlayer soundP;
 	public Dimension screenSize;
 	public int prvGamestate;
@@ -61,16 +58,14 @@ public class GamePanel extends JPanel {
 		double nextUpdateTime = System.nanoTime() + updateInterval;
 		public void run() {
 			while(!game.closed) {
-				synchronized(gamePanelThread) {
-					update();
-					try {
-						double remainingTime = nextUpdateTime - System.nanoTime();
-						remainingTime /= 1000000;
-						if (remainingTime < 0) remainingTime = 0;
-						sleep((long) remainingTime);
-						nextUpdateTime += updateInterval;
-					} catch (InterruptedException ignored) {
-					}
+				update();
+				try {
+					double remainingTime = nextUpdateTime - System.nanoTime();
+					remainingTime /= 1000000;
+					if (remainingTime < 0) remainingTime = 0;
+					sleep((long) remainingTime);
+					nextUpdateTime += updateInterval;
+				} catch (InterruptedException ignored) {
 				}
 			}
 		}
@@ -81,9 +76,7 @@ public class GamePanel extends JPanel {
 		final double nextUpdateTime = System.nanoTime() + updateInterval;
 		public void run() {
 			while(!game.closed) {
-				synchronized(drawGraphicsThread) {
 					repaint();
-				}
 			}
 		}
 	});
@@ -101,45 +94,23 @@ public class GamePanel extends JPanel {
 		setFocusable(true);
 		requestFocus();
 		keyH = new KeyHandler();
+		pinkTeint = true;
 		menu = new Menu(this,keyH);
 		addKeyListener(keyH);
 		addMouseListener(keyH);
 		addMouseWheelListener(keyH);
 		gamePanelThread.start();
 		drawGraphicsThread.start();
-		pinkTeint = true;
 		cam = new Camera(this,keyH);
 		tileM = new TileManager(this);
 		colC = new CollisionChecker(this);
 		player = new Player(this, keyH);
 		yoshi = new Companion(this, keyH);
-		e1 = new Enemy(this, keyH);
+		//e1 = new Enemy(this, keyH);
+		entityManager = new EntityManager(this, keyH);
 		soundP = new SoundPlayer();
 	}
-	
-	private synchronized void drawOrderBubbleSort() {
-		entityList = List.of(player,yoshi,e1);
-		entityArrayList = new ArrayList<>(entityList);
-		boolean swapped = true;
-		while(swapped)
-		{
-			Entity lowerPriority;
-			Entity higherPriority;
-			for(int i = 0; i < entityArrayList.size() - 1; i++) {
-				if(entityArrayList.get(i).worldY + entityArrayList.get(i).height
-						> entityArrayList.get(i+1).worldY + entityArrayList.get(i+1).height) {
-					lowerPriority = entityArrayList.get(i);
-					higherPriority = entityArrayList.get(i+1);
-					entityArrayList.set(i+1, lowerPriority);
-					entityArrayList.set(i,higherPriority);
-				}else{
-					swapped = false;
-				}
-			}
-		}
-		entityList = entityArrayList;
-	}
-	
+
 	public synchronized void setScreenSize()
 	{
 		if (fullscreen)
@@ -155,15 +126,15 @@ public class GamePanel extends JPanel {
 			screenSize = new Dimension(screenWidth,screenHeight);
 		}
 		setPreferredSize(screenSize);
-		
+
 		try {
 			cam.init(); menu.init(); player.setScreenPosition();
-		} 
+		}
 		catch ( NullPointerException ignored) { }
 	}
-	
+
 	private void switchMode() {
-		
+
 		switch(gamestate) {
 		case 0:
 			break;
@@ -187,28 +158,22 @@ public class GamePanel extends JPanel {
 		}
 	}
 
-	public synchronized void update() {
-		switch (gamestate) {
+	public void update()
+	{
+		switch (gamestate)
+		{
 			case 0 :
 				menu.update();
 				break;
-			case 1 :
+			case 1, 2:
 				switchMode();
 				tileM.update();
-                for (Entity entity : entityList) {
-                    entity.update();
-                }
+				entityManager.update();
 				break;
 			case 11 :
 				switchMode();
 				break;
-			case 2 :
-				switchMode();
-                for (Entity entity : entityList) {
-                    entity.update();
-                }
-				break;
-			case 3, 31:
+            case 3, 31:
 				switchMode();
 				menu.update();
 				break;
@@ -220,67 +185,40 @@ public class GamePanel extends JPanel {
 		}
 		getMousePosOnScreen();
 	}
-	
-	public void paintComponent(Graphics g) {
-		synchronized(drawGraphicsThread)
-		{
+
+	public void paintComponent(Graphics g)
+	{
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 			switch (gamestate)
 			{
 				case 0 :
-						menu.draw(g2);
+					menu.draw(g2);
 					break;
-				case 1 :
-						tileM.draw(g2);
-						drawOrderBubbleSort();
-						for (Entity entity : entityList) {
-							entity.draw(g2);
-							entity.drawHealthbar(entity, g2);
-						}
-						player.inv.draw(g2);
-						menu.drawCrosshair(g2);
+				case 1, 2:
+					tileM.draw(g2);
+					entityManager.draw(g2);
+					player.inv.draw(g2);
+					menu.drawCrosshair(g2);
 					break;
 				case 11 :
 					tileM.draw(g2);
-					yoshi.draw(g2);
-					e1.draw(g2);
-					player.draw(g2);
+					entityManager.draw(g2);
 					player.inv.draw(g2);
 					menu.drawCursor(g2);
 					break;
-				case 2 :
-						tileM.draw(g2);
-						drawOrderBubbleSort();
-						for (Entity entity : entityList) {
-							entity.draw(g2);
-							entity.drawHealthbar(entity, g2);
-							g2.setColor(Color.red);
-							g2.setStroke(new BasicStroke(3));
-							g2.drawRect(entity.screenX + entity.hitbox.x, entity.screenY + entity.hitbox.y,
-									entity.hitbox.width, entity.hitbox.height);
-
-						}
-						player.inv.draw(g2);
-						menu.drawCrosshair(g2);
-						//Show Version
-						g2.setFont(new Font("font", Font.BOLD, 16));
-						g2.setColor(Color.darkGray);
-						g2.drawString(game.version, screenWidth /20, screenHeight /10);
-					break;
-				case 3, 31:
+                case 3, 31:
 					tileM.draw(g2);
-					yoshi.draw(g2);
-					e1.draw(g2);
-					player.draw(g2);
+					entityManager.draw(g2);
 					menu.draw(g2);
 					break;
                 case 311:
 					break;
 			}
-			
+
 			//Pink Teint
-			if(pinkTeint) {
+			if(pinkTeint)
+			{
 				g2.setColor(new Color(1.0F, 0.0F, 1.0F, 0.1F));
 				g2.fillRect(0, 0, screenWidth, screenHeight);
 			}
@@ -290,23 +228,26 @@ public class GamePanel extends JPanel {
 			g2.fillRect(0, 0, screenWidth, screenHeight);
 
 			g2.dispose();
-		}
 	}
-	
-	public synchronized void getMousePosOnScreen() {
-		try {
+
+	public void getMousePosOnScreen()
+	{
+		try
+		{
 			mouseX = getMousePosition().x;
 			mouseY = getMousePosition().y;
 		} catch (Exception ignore) { }
 	}
-	
-	public synchronized Point getMousePosOnMap() {
+
+	public Point getMousePosOnMap()
+	{
 		int mouseXRelativeToMap = (int) (player.worldX - player.screenX + mouseX);
 		int mouseYRelativeToMap = (int) (player.worldY - player.screenY + mouseY);
 		return new Point(mouseXRelativeToMap,mouseYRelativeToMap);
 	}
-	
-	public synchronized void resetWindowSize() throws InterruptedException { 
+
+	public synchronized void resetWindowSize() throws InterruptedException
+	{
 		gamestate = 311;
 		game.window.remove(this);
 		game.window.dispose();
@@ -323,15 +264,21 @@ public class GamePanel extends JPanel {
 		gamestate = 31;
 	}
 
-	public synchronized void setGamestate(int gamestate)
+	public void setGamestate(int gamestate)
 	{
 		this.prvGamestate = this.gamestate;
 		this.gamestate = gamestate;
 	}
-	
-	public String isFullscreen()
+
+	public String fullscreenToString()
 	{
 		if (fullscreen) return "true";
+		return "false";
+	}
+
+	public String teintToString()
+	{
+		if (pinkTeint) return "true";
 		return "false";
 	}
 }

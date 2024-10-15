@@ -3,7 +3,6 @@ package menu;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -12,7 +11,6 @@ import java.io.IOException;
 import java.util.Objects;
 import javax.imageio.ImageIO;
 
-import main.Game;
 import main.GamePanel;
 import main.KeyHandler;
 
@@ -27,7 +25,6 @@ public class Button
 	int textSize;
 	int textOffset;
 	Font f;
-	FontMetrics fontMetrics;
 	String name;
 	String text;
 
@@ -58,95 +55,85 @@ public class Button
 		init();
 	}
 
-	private void init()
+	private synchronized void init()
 	{
 		textSize = 64;
 		textOffset = 10;
-		f = new Font("RuneScape UF", 1, textSize);   
+		f = new Font("RuneScape UF", Font.BOLD, textSize);
 		FontRenderContext frc = new FontRenderContext(new AffineTransform(),true,true);  
 		
 		switch (name) {
 			case "Exit" :
 				height = (int) (30*gp.scale);
 				width = (int) (30*gp.scale);
-				screenX = gp.screenWidth - width - gp.screenWidth * 1/20;
-				screenY = gp.screenHeight * 1/20;
+				screenX = gp.screenWidth - width - gp.screenWidth /20;
+				screenY = gp.screenHeight /20;
 				break;
-			case "Start" :
+			case "Start", "Back":
 				this.width = (int) (f.getStringBounds(text, frc).getWidth());
 				this.height = (int)(f.getStringBounds(text, frc).getHeight());
-				screenX = gp.screenWidth - width - gp.screenWidth * 1/20;
+				screenX = gp.screenWidth - width - gp.screenWidth /20;
 				screenY = gp.screenHeight * 9/10 - height/2;
 				break;
 			case "Settings":
 				this.width = (int) (f.getStringBounds(text, frc).getWidth());
 				this.height = (int)(f.getStringBounds(text, frc).getHeight());
-				screenX = gp.screenWidth - width - gp.screenWidth * 1/20;
+				screenX = gp.screenWidth - width - gp.screenWidth /20;
 				screenY = gp.screenHeight * 9/10 - height - height/2 - 4;
 				break;
 			case "Fullscreen":
 				this.width = (int) (f.getStringBounds(text, frc).getWidth());
 				this.height = (int)(f.getStringBounds(text, frc).getHeight());
-				screenX = gp.screenWidth/2 - width/2;
-				screenY = gp.screenHeight * 1/10;
+				screenX = gp.screenWidth/20;
+				screenY = gp.screenHeight/20;
 				state = gp.fullscreen;
 				break;
 			case "Scaling":
 				this.width = (int) (f.getStringBounds(text, frc).getWidth());
 				this.height = (int)(f.getStringBounds(text, frc).getHeight());
-				screenX = gp.screenWidth/2 - width/2;
-				screenY = gp.screenHeight * 1/10 * 2;
+				screenX = gp.screenWidth/20;
+				screenY = gp.screenHeight/20 +height + 5;
 				break;
-			case "Back":
+			case "Teint":
 				this.width = (int) (f.getStringBounds(text, frc).getWidth());
 				this.height = (int)(f.getStringBounds(text, frc).getHeight());
-				screenX = gp.screenWidth - width - gp.screenWidth * 1/20;
-				screenY = gp.screenHeight * 9/10 - height/2;
-		}
+				screenX = gp.screenWidth/20;
+				screenY = gp.screenHeight/20 +(height + 5) * 2;
+        }
 	}
 
 	private void getButtonImage()
 	{
 		try
 		{
-			exitButton = ImageIO.read(getClass().getResourceAsStream("/hud/exitButton.png"));
-			startButton = ImageIO.read(getClass().getResourceAsStream("/hud/startButton.png"));
-			exitButtonPressable = ImageIO
-					.read(getClass().getResourceAsStream("/hud/exitButtonPressable.png"));
-			startButtonPressable = ImageIO
-					.read(getClass().getResourceAsStream("/hud/startButtonPressable.png"));
+			exitButton = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/hud/exitButton.png")));
+			startButton = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/hud/startButton.png")));
+			exitButtonPressable = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/hud/exitButtonPressable.png")));
+			startButtonPressable = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/hud/startButtonPressable.png")));
+			System.out.println("Success: Successfully loaded button resources");
 		} catch (IOException e) {
-			e.printStackTrace();
-			System.out.println("Knopf Texturen konnten nicht geladen werden");
+			System.out.println("Error: Couldn't load button resources");
 		}
 	}
 	
 	public synchronized void update()
 	{
-		if (gp.mouseX > screenX &&
-			gp.mouseX < screenX + width &&
-			gp.mouseY > screenY &&
-			gp.mouseY < screenY + height)
-		{
-			pressable = true;
-		}
-		else { pressable = false; }
+        pressable = gp.mouseX > screenX &&
+                gp.mouseX < screenX + width &&
+                gp.mouseY > screenY &&
+                gp.mouseY < screenY + height;
 
 		if (pressable && (keyH.m1 || keyH.m2))
 		{
 			if(keyH.m1) {
-				switch (name) 
+				switch (name)
 				{
 					case "Exit" :
 						switch(gp.gamestate) {
 						case 0:
 							gp.setGamestate(999);
 							break;
-						case 3:
-							keyH.m1 = false;
-							gp.setGamestate(0);
-							break;
-						case 31:
+						case 3, 31:
 							keyH.m1 = false;
 							gp.setGamestate(0);
 							break;
@@ -164,14 +151,13 @@ public class Button
 						try {
 							gp.resetWindowSize();
 						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
+							throw new RuntimeException(e);
 						}
 						keyH.m1 = false;
-						if(gp.entityList != null)
+						if(gp.entityManager.entityList != null)
 						{
-							for(int i = 0; i < gp.entityList.size(); i++)
-								gp.entityList.get(i).update();
+							for(int i = 0; i < gp.entityManager.entityList.size(); i++)
+								gp.entityManager.entityList.get(i).update();
 						}
 						gp.repaint();
 						break;
@@ -189,21 +175,16 @@ public class Button
 						}
 					case "Scaling":
 						keyH.m1 = false;
-						//Game.infoBox("Not yet implemented!", "FAILURE!");
-						//gp.scale += 0.1;
 						break;
-					}
-				} 
-				if (keyH.m2) 
-				{
-					/*switch(name)
-					{
-					case "Scaling":
-						keyH.m2 = false;
-						gp.scale -= 0.1;
+					case "Teint":
+						keyH.m1 = false;
+						gp.pinkTeint = !gp.pinkTeint;
+						text = "PINK TEINT: " + gp.teintToString().toUpperCase();
+						init();
+						//gp.repaint();
 						break;
-					}*/
 				}
+			}
 		}
 	}
 

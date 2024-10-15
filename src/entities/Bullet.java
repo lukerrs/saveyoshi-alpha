@@ -1,34 +1,58 @@
 package entities;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 
 import main.GamePanel;
 import main.KeyHandler;
 
 public class Bullet extends Entity{
 	String type;
+	double xSpeed;
+	double ySpeed;
+	double angle;
 	
-	public Bullet(double worldX, double worldY, int w, int h, int damage, GamePanel gp, KeyHandler keyH)
+	public Bullet(double worldX, double worldY, int damage,double speed, double angle, GamePanel gp, KeyHandler keyH)
 	{
 		super(gp, keyH);
 		this.worldX = worldX;
 		this.worldY = worldY;
-		this.width = w;
-		this.height = h;
+		this.width = gp.tileSize/8;
+		this.height = width;
 		this.damage = damage;
-	}
-	
-	public synchronized void draw(Graphics2D g2)
-	{
-		int x = gp.getMousePosOnMap().x;
-		int y = gp.getMousePosOnMap().y;
-		int w = 20;
-		g2.fillRect(x,y,w,w);
+		this.speed = speed * gp.scale;
+		this.xSpeed = speed * Math.cos(angle);
+		this.ySpeed = speed * Math.sin(angle);
+		isAlive = true;
+		hitbox = new Rectangle();
+		hitbox.x = (int) (0 * gp.scale);
+		hitbox.y = (int) (0 * gp.scale);
+		hitbox.width = (int) width;
+		hitbox.height = (int) height;
+		gp.entityManager.entityList.add(this);
 	}
 
-	public synchronized void update()
+	public void die(){
+		isAlive = false;
+		gp.entityManager.entityList.remove(this);
+	}
+	
+	public void draw(Graphics2D g2)
 	{
-		
+		g2.setColor(Color.yellow);
+		g2.fillRect(screenX,screenY,width, height);
+	}
+
+	public void update()
+	{
+		for(Entity entity: gp.entityManager.entityList) {
+			gp.colC.checkBulletHit(this, entity);
+		}
+
+		worldX += xSpeed;
+		worldY += ySpeed;
+
+		screenX = (int) (worldX - gp.player.worldX + gp.player.screenX);
+		screenY = (int) (worldY - gp.player.worldY + gp.player.screenY);
 	}
 }
 

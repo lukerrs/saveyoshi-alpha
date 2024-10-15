@@ -13,24 +13,22 @@ import main.KeyHandler;
 public class Enemy extends Entity {
 	String type;
 
-	public Enemy(GamePanel gp, KeyHandler keyH) {
+	/*public Enemy(GamePanel gp, KeyHandler keyH) {
 		super(gp, keyH);
 		init();
 		getEnemyImage();
-	}
+	}*/
 	
 	public Enemy(double worldX, double worldY, String type, GamePanel gp, KeyHandler keyH) {
 		super(gp, keyH);
 		this.worldX = worldX;
 		this.worldY = worldY;
 		this.type = type;
-		init();
 		getEnemyImage();
+		init(this.worldX,this.worldY);
 	}
 
-	private synchronized void init() {
-		worldX = gp.tileSize * gp.maxWorldCol / 2 + gp.tileSize;
-		worldY = gp.tileSize * gp.maxWorldRow / 2 + gp.tileSize;
+	private void init(double worldX, double worldY) {
 		width = gp.tileSize;
 		height = gp.tileSize;
 		speed = 1 * gp.scale;
@@ -44,9 +42,10 @@ public class Enemy extends Entity {
 		direction = "stilldown";
 		old_direction = "stilldown";
 		isAlive = true;
+		isHostile = true;
 	}
 
-	private synchronized void getEnemyImage() {
+	private void getEnemyImage() {
 		try {
 			p1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_1.png")));
 			p2 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_2.png")));
@@ -61,8 +60,21 @@ public class Enemy extends Entity {
 			System.out.println("Error: Failed to load Enemy resources");
 		}
 	}
+	private void follow() {
+		if (worldX + (double) width / 2 >= gp.player.worldX + gp.player.width + gp.tileSize) direction = "left";
+		else if (worldX + (double) width / 2 <= gp.player.worldX - gp.tileSize) direction = "right";
+		else if (worldY > gp.player.worldY + gp.player.height + gp.tileSize) direction = "up";
+		else if (worldY < gp.player.worldY - gp.tileSize) direction = "down";
+		else if (worldX >= gp.player.worldX - (double) gp.tileSize /2
+			&& worldX <= gp.player.worldX + gp.player.width + (double) gp.tileSize /2
+			&& worldY >= gp.player.worldY - (double) gp.tileSize /2
+			&& worldY <= gp.player.worldY + gp.player.height + (double) gp.tileSize /2)
+		{
+			direction = "stilldown";
+		}
+	}
 
-	public synchronized void update() {
+	public void update() {
 		if(isAlive) {
 			old_direction = direction;
 			direction = "stilldown";
@@ -73,7 +85,7 @@ public class Enemy extends Entity {
 		}
 	}
 
-	public synchronized void draw(Graphics2D g2) {
+	public void draw(Graphics2D g2) {
 		BufferedImage image = null;
 		if(isAlive)
 		{

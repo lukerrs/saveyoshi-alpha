@@ -47,6 +47,9 @@ public class TileManager
 			tile[201].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/dirt/Dirt_2.png")));
 			tile[202] = new Tile();
 			tile[202].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/dirt/Dirt_3.png")));
+
+			tile[210] = new Tile();
+			tile[210].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/dirtpath/Dirtpatht_1.png")));
 			
 			tile[300] = new Tile();
 			tile[300].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/sand/Sand_1.png")));
@@ -63,31 +66,25 @@ public class TileManager
 			tile[701] = new Tile();
 			tile[701].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/water/Water_1_a2.png")));
 			tile[701].collision = true;
+			System.out.println("Success: Successfully loaded texture resources");
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("Error: Couldn't load texture resources");
 		}
 	}
 
 	protected synchronized void spriteCounter(int num)
 	{
 		spriteCounter++;
-		int time = num;
-		switch (num) {
-			case 2 :
-				time = 30;
-				break;
-			case 3 :
-				time = 25;
-				break;
-			case 4 :
-				time = 20;
-				break;
-			case 8 :
-				time = 10;
-				break;
-		}
+		int time = switch (num)
+		{
+            case 2 -> 30;
+            case 3 -> 25;
+            case 4 -> 20;
+            case 8 -> 10;
+            default -> 0;
+        };
 
-		if (spriteCounter > time) {
+        if (spriteCounter > time) {
 			spriteNum++;
 			spriteCounter = 0;
 		}
@@ -102,7 +99,8 @@ public class TileManager
 		try
 		{
 			InputStream is = getClass().getResourceAsStream(filePath);
-			BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            assert is != null;
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			int col = 0;
 			int row = 0;
 
@@ -114,7 +112,7 @@ public class TileManager
 					mapTileNumber[col][row] = num;
 					if(num == 100)
 					{
-						switch(rd.nextInt(0,4)) 
+						switch(rd.nextInt(0,4))
 						{
 						default:
 							mapTileNumber[col][row] += 1;
@@ -130,17 +128,27 @@ public class TileManager
 					
 					if(num == 200)
 					{
-						switch(rd.nextInt(0,4)) 
+						try {
+							if (mapTileNumber[col][row + 1] >= 100 && mapTileNumber[col][row + 1] < 200) {
+								switch (mapTileNumber[col][row + 1]) {
+									case 200:
+										mapTileNumber[col][row] = 211;
+										break;
+								}
+							}
+						} catch (Exception ignored){ }
+
+						switch (rd.nextInt(0, 4))
 						{
-						default:
-							mapTileNumber[col][row] += 0;
-							break;
-						case 2:
-							mapTileNumber[col][row] += 1;
-							break;
-						case 3:
-							mapTileNumber[col][row] += 2;
-							break;
+							default:
+								mapTileNumber[col][row] += 0;
+								break;
+							case 2:
+								mapTileNumber[col][row] += 1;
+								break;
+							case 3:
+								mapTileNumber[col][row] += 2;
+								break;
 						}
 					}
 					

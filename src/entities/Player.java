@@ -40,13 +40,13 @@ public class Player extends Entity {
 		hitbox.height = (int) (32 * gp.scale);
 	}
 	
-	public synchronized void setScreenPosition()
+	public void setScreenPosition()
 	{
 		screenX = Camera.x - gp.tileSize/2;
 		screenY = Camera.y - gp.tileSize/2;
 	}
 
-	private synchronized void getPlayerImage()
+	private void getPlayerImage()
 	{
 		try {
 			s1u = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_up_1.png")));
@@ -85,7 +85,7 @@ public class Player extends Entity {
 		}
 	}
 
-	private synchronized void move() {
+	private void move() {
 		collision = false;
 
 		try {
@@ -93,7 +93,7 @@ public class Player extends Entity {
 		} catch (Exception e) { }
 		
 		if (!collision && isMoving) {
-			if (direction == "up") worldY -= speed;
+			if (Objects.equals(direction, "up")) worldY -= speed;
 			else if (Objects.equals(direction, "down")) worldY += speed;
 			else if (Objects.equals(direction, "right")) worldX += speed;
 			else if (Objects.equals(direction, "left")) worldX -= speed;
@@ -128,13 +128,13 @@ public class Player extends Entity {
 		}
 	}
 
-	public synchronized void update() {
+	public void update() {
 		move();
 		inv.update();
 		spriteCounter(4);
 	}
 
-	public synchronized void draw(Graphics2D g2) {
+	public void draw(Graphics2D g2) {
 		BufferedImage image = null;
 		switch (direction) {
 			case "stillright":

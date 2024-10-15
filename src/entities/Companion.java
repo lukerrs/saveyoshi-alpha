@@ -18,10 +18,10 @@ public class Companion extends Entity {
 	public Companion(GamePanel gp, KeyHandler keyH) {
 		super(gp, keyH);
 		init();
-		getCompanionImage();
 	}
 
 	private synchronized void init() {
+		getCompanionImage();
 		worldX = gp.tileSize * gp.maxWorldCol / 2 - gp.tileSize;
 		worldY = gp.tileSize * gp.maxWorldRow / 2 - gp.tileSize;
 		width = gp.tileSize;
@@ -43,7 +43,7 @@ public class Companion extends Entity {
 		followCounter = 0;
 	}
 
-	private synchronized void getCompanionImage() {
+	private void getCompanionImage() {
 		try {
 			u1 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_up_1.png"));
 			u2 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_up_2.png"));
@@ -64,7 +64,7 @@ public class Companion extends Entity {
 		}
 	}
 
-	private synchronized void randomMovement(int randomInterval) {
+	private void randomMovement(int randomInterval) {
 		randomCounter++;
 		if (randomCounter > randomInterval && randomize) {
 			float tempRd = rd.nextFloat(1.0F);

@@ -3,6 +3,7 @@ package main;
 import java.awt.Point;
 import java.awt.Rectangle;
 
+import entities.Bullet;
 import entities.Entity;
 
 public class CollisionChecker {
@@ -32,7 +33,7 @@ public class CollisionChecker {
                     entityTopRow = (int) ((entityTopWorldY - entity.speed) / gp.tileSize);
                     tileNum1 = gp.tileM.mapTileNumber[entityLeftCol][entityTopRow];
                     tileNum2 = gp.tileM.mapTileNumber[entityRightCol][entityTopRow];
-                    if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true )
+                    if(gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
                     {
                         entity.collision = true;
                     }
@@ -41,7 +42,7 @@ public class CollisionChecker {
                     entityBotRow = (int) ((entityBotWorldY + entity.speed) / gp.tileSize);
                     tileNum1 = gp.tileM.mapTileNumber[entityLeftCol][entityBotRow];
                     tileNum2 = gp.tileM.mapTileNumber[entityRightCol][entityBotRow];
-                    if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true )
+                    if(gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
                     {
                         entity.collision = true;
                     }
@@ -50,7 +51,7 @@ public class CollisionChecker {
                     entityLeftCol = (int) ((entityLeftWorldX - entity.speed) / gp.tileSize);
                     tileNum1 = gp.tileM.mapTileNumber[entityLeftCol][entityTopRow];
                     tileNum2 = gp.tileM.mapTileNumber[entityLeftCol][entityBotRow];
-                    if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true )
+                    if(gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
                     {
                         entity.collision = true;
                     }
@@ -59,7 +60,7 @@ public class CollisionChecker {
                     entityRightCol = (int) ((entityRightWorldX + entity.speed) / gp.tileSize);
                     tileNum1 = gp.tileM.mapTileNumber[entityRightCol][entityTopRow];
                     tileNum2 = gp.tileM.mapTileNumber[entityRightCol][entityBotRow];
-                    if(gp.tileM.tile[tileNum1].collision == true || gp.tileM.tile[tileNum2].collision == true )
+                    if(gp.tileM.tile[tileNum1].collision || gp.tileM.tile[tileNum2].collision)
                     {
                         entity.collision = true;
                     }
@@ -68,7 +69,8 @@ public class CollisionChecker {
 	}
 		
 	public void checkDamage(Entity entity1, Entity entity2) {
-			if (entity1.worldX < entity2.worldX + entity2.hitbox.x + entity2.hitbox.width &&
+			if (entity1 != entity2 &&
+				entity1.worldX < entity2.worldX + entity2.hitbox.x + entity2.hitbox.width &&
 				entity1.worldX + entity1.width > entity2.worldX + entity2.hitbox.x &&
 				entity1.worldY < entity2.worldY + entity2.hitbox.y + entity2.hitbox.height&&
 				entity1.worldY + entity1.height > entity2.worldY - entity2.hitbox.height)
@@ -88,9 +90,26 @@ public class CollisionChecker {
 	}
 	
 	@SuppressWarnings("unused")
-	public void checkBulletHit(Entity entity1, Entity entity2) {
-		Point Bullet = new Point((int) entity1.worldX,(int) entity1.worldY);
-		Rectangle Enemy = new Rectangle((int) entity2.worldX + entity2.hitbox.x,(int) entity2.worldY + entity2.hitbox.y,
-				entity2.width - entity2.hitbox.width, entity2.height - entity2.hitbox.height);
+	public void checkBulletHit(Bullet b, Entity entity) {
+		if (entity != gp.player && entity != b &&
+			b.worldX < entity.worldX + entity.hitbox.x + entity.hitbox.width &&
+			b.worldX + b.width > entity.worldX + entity.hitbox.x &&
+			b.worldY < entity.worldY + entity.hitbox.y + entity.hitbox.height&&
+			b.worldY + b.height > entity.worldY - entity.hitbox.height)
+		{
+			System.out.println("Enemy hit");
+			entity.health -= b.damage;
+			b.die();
+
+
+				/*
+				Game.infoBox(
+						"explosionX: " + gp.getMousePosOnMap().x +
+						"   enemyX: " + entity2.worldX +
+						"\nexplosionY: " + gp.getMousePosOnMap().y +
+						"   enemyY: " + entity2.worldY,
+						"Mouse and Enemy Position");
+				*/
+		}
 	}
 }

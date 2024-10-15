@@ -23,7 +23,7 @@ public class Menu
 	KeyHandler keyH;
 	Button start;
 	Button exit;
-	Button settings, fullscreenSetting, scalingSetting, back;
+	Button settings, fullscreenSetting, scalingSetting, teintSetting, back;
 	String state;
 	Font font;
 	int textSize;
@@ -50,8 +50,9 @@ public class Menu
 		exit = new Button("Exit", gp, keyH);
 		back = new Button("Back", "BACK", gp, keyH);
 		settings = new Button("Settings", "SETTINGS", gp, keyH);
-		fullscreenSetting = new Button("Fullscreen", "FULLSCREEN: " + gp.isFullscreen().toUpperCase(), gp, keyH);
+		fullscreenSetting = new Button("Fullscreen", "FULLSCREEN: " + gp.fullscreenToString().toUpperCase(), gp, keyH);
 		scalingSetting = new Button("Scaling", "SCALING: " + gp.scale, gp, keyH);
+		teintSetting = new Button("Teint", "PINK TEINT: " + gp.teintToString().toUpperCase(), gp, keyH);
 		state = "mainmenu";
 	}
 	
@@ -72,7 +73,7 @@ public class Menu
 		}
 	}
 	
-	public synchronized void setState()
+	public void changeState()
 	{
 		switch (gp.gamestate)
 		{
@@ -88,7 +89,7 @@ public class Menu
 		}
 	}
 	
-	public synchronized void drawCursor(Graphics2D g2) 
+	public void drawCursor(Graphics2D g2)
 	{
 		int curWH = gp.tileSize;
 		int cursorX = gp.mouseX - curWH / 6;
@@ -96,7 +97,7 @@ public class Menu
 		g2.drawImage(cursor, cursorX, cursorY, curWH, curWH, null);
 	}
 	
-	public synchronized void drawCrosshair(Graphics2D g2)
+	public void drawCrosshair(Graphics2D g2)
 	{
 		int crossWH = gp.tileSize / 2;
 		int crosshairX = gp.mouseX - crossWH / 2;
@@ -104,7 +105,7 @@ public class Menu
 		g2.drawImage(crosshair, crosshairX, crosshairY, crossWH, crossWH, null);
 	}
 	
-	public synchronized void drawVersion(Graphics2D g2) {
+	public void drawVersion(Graphics2D g2) {
 		font = new Font("font", Font.BOLD,16);
 		final String version = "v"+gp.game.version;
 		g2.setFont(font);
@@ -119,7 +120,7 @@ public class Menu
 	
 	public synchronized void update() 
 	{
-		setState();
+		changeState();
 		switch(state)
 		{
 		case "mainmenu":
@@ -135,6 +136,7 @@ public class Menu
 		case "settings":
 			fullscreenSetting.update();
 			scalingSetting.update();
+			teintSetting.update();
 			exit.update();
 			back.update();
 			break;
@@ -143,7 +145,7 @@ public class Menu
 	
 	public synchronized void draw(Graphics2D g2) 
 	{
-		setState();
+		changeState();
 		font = new Font("RuneScape UF", Font.BOLD, textSize);
 		g2.setFont(font);
 		switch(state) 
@@ -218,6 +220,7 @@ public class Menu
 			}
 			scalingSetting.draw(g2);
 			fullscreenSetting.draw(g2);
+			teintSetting.draw(g2);
 			exit.draw(g2);
 			back.draw(g2);
 			drawCursor(g2);
