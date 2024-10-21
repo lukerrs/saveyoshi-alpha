@@ -23,7 +23,7 @@ public class ItemManager {
 		init();
 	}
 
-	private synchronized void init() {
+	private void init() {
 		items = new Item[20];
 		hotbar = new Item[6];
 		selected = 0;
@@ -33,7 +33,7 @@ public class ItemManager {
 		hotbar[1] = new Throwable("poison",gp,keyH);
 	}
 
-	public synchronized void update() {
+	public void update() {
 		selected += (int) keyH.mouseWheelRotation;
 		
 		if(selected == hotbar.length) selected = 0;
@@ -59,41 +59,10 @@ public class ItemManager {
 		keyH.mouseWheelRotation = 0;
 	}
 
-	public synchronized void draw(Graphics2D g2) {
+	public void draw(Graphics2D g2) {
 		switch (gp.gamestate)
 		{
-			default:
-				for (int i = 0; i < hotbar.length; i++)
-				{
-					int x = gp.screenWidth / 2 - hotbarBoxSize * (hotbar.length)
-							/ 2 + i * hotbarBoxSize;
-					int y = (int) (gp.screenHeight - hotbarBoxSize * 1.5);
-					g2.setColor(Color.lightGray);
-					g2.fillRect(x, y, hotbarBoxSize, hotbarBoxSize);
-					if (selected == i) {
-						g2.setStroke(new BasicStroke(4));
-						g2.setColor(Color.red);
-						g2.drawRect(x + 2, y + 2,
-								hotbarBoxSize - 3, hotbarBoxSize - 3);
-					}
-					
-					g2.setStroke(new BasicStroke(1));
-					g2.setColor(Color.white);
-					g2.drawRect(x, y, hotbarBoxSize, hotbarBoxSize);
-					
-					if (hotbar[i] != null) {
-						g2.drawImage(
-								hotbar[i].image, x + imageOffset,
-								y + imageOffset,
-								hotbarBoxSize - imageOffset * 2,
-								hotbarBoxSize - imageOffset * 2,
-								null);
-					}
-
-					
-				}
-				break;
-			case 11:
+            case 11:
 				g2.setStroke(new BasicStroke(0));
 				g2.setColor(Color.darkGray);
 				g2.fillRect(
@@ -121,6 +90,37 @@ public class ItemManager {
 					}
 				}
 				break;
-		}
+            default:
+                for (int i = 0; i < hotbar.length; i++)
+                {
+                    int x = gp.screenWidth / 2 - hotbarBoxSize * (hotbar.length)
+                            / 2 + i * hotbarBoxSize;
+                    int y = (int) (gp.screenHeight - hotbarBoxSize * 1.5);
+                    g2.setColor(Color.lightGray);
+                    g2.fillRect(x, y, hotbarBoxSize, hotbarBoxSize);
+                    if (selected == i) {
+                        g2.setStroke(new BasicStroke(4));
+                        g2.setColor(Color.red);
+                        g2.drawRect(x + 2, y + 2,
+                                hotbarBoxSize - 3, hotbarBoxSize - 3);
+                    }
+
+                    g2.setStroke(new BasicStroke(1));
+                    g2.setColor(Color.white);
+                    g2.drawRect(x, y, hotbarBoxSize, hotbarBoxSize);
+
+                    if (hotbar[i] != null) {
+                        g2.drawImage(
+                                hotbar[i].image, x + imageOffset,
+                                y + imageOffset,
+                                hotbarBoxSize - imageOffset * 2,
+                                hotbarBoxSize - imageOffset * 2,
+                                null);
+                    }
+
+
+                }
+                break;
+        }
 	}
 }

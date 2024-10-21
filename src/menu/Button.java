@@ -148,11 +148,7 @@ public class Button
 						gp.setGamestate(31);
 						break;
 					case "Fullscreen":
-						try {
-							gp.resetWindowSize();
-						} catch (InterruptedException e) {
-							throw new RuntimeException(e);
-						}
+						gp.resetWindowSize();
 						keyH.m1 = false;
 						if(gp.entityManager.entityList != null)
 						{

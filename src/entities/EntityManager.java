@@ -8,14 +8,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import main.GamePanel;
 import main.KeyHandler;
 
-public class EntityManager {
+public class EntityManager extends Thread{
 	GamePanel gp;
 	KeyHandler keyH;
 	public List<Entity> entityList;
 	int randomCounter;
 	int randomIntervalInSeconds;
 	int state;
-	boolean active;
+	private volatile boolean active;
+	private boolean spawnEnemys;
 
 	public EntityManager(GamePanel gp, KeyHandler keyH) {
 		this.gp = gp;
@@ -23,9 +24,27 @@ public class EntityManager {
 		this.entityList = new CopyOnWriteArrayList<>(); // Thread-sichere Liste verwenden
 		entityList.add(gp.player);
 		entityList.add(gp.yoshi);
-		randomIntervalInSeconds = 5;
+		randomIntervalInSeconds = 3;
 		state = 0;
 		active = true;
+	}
+
+	@Override
+	public void run(){
+		active = true;
+		final double updateInterval = ((double) 1000000000 / gp.tickRate);
+		double nextUpdateTime = System.nanoTime() + updateInterval;
+		while(active){
+			if(gp.gamestate == 1 || gp.gamestate == 2) update();
+			try {
+				double remainingTime = nextUpdateTime - System.nanoTime();
+				remainingTime /= 1000000;
+				if (remainingTime < 0) remainingTime = 0;
+				sleep((long) remainingTime);
+				nextUpdateTime += updateInterval;
+			} catch (InterruptedException ignored) {
+			}
+		}
 	}
 
 	public void newRandomState() {
@@ -37,24 +56,16 @@ public class EntityManager {
 				break;
 			case 2:
 				break;
-			case 3:
-				break;
-			case 4:
-				break;
-			case 5:
-				break;
-			case 6:
-				break;
-			case 7:
-				break;
-			case 8:
-				break;
 		}
 	}
 
+	public void spawnSingleEnemy(){
+
+	}
+
 	public void fourEnemysEncirclePlayer() {
-		double x = gp.player.worldX;
-		double y = gp.player.worldY;
+		int x = (int) gp.player.worldX;
+		int y = (int) gp.player.worldY;
 		int spawnDistance = 3;
 		Enemy e1 = new Enemy(x + gp.tileSize * spawnDistance, y + gp.tileSize * spawnDistance, "greyGhost", gp, keyH);
 		entityList.add(e1);
@@ -64,7 +75,6 @@ public class EntityManager {
 		entityList.add(e3);
 		Enemy e4 = new Enemy(x - gp.tileSize * spawnDistance, y - gp.tileSize * spawnDistance, "greyGhost", gp, keyH);
 		entityList.add(e4);
-		active = false;
 	}
 
 	private void drawOrderBubbleSort() {
@@ -86,21 +96,24 @@ public class EntityManager {
 	}
 
 	public void update() {
-		if (active) {
-			randomCounter++;
-			if (randomCounter > gp.tickRate * randomIntervalInSeconds) {
-				fourEnemysEncirclePlayer();
-				randomCounter = 0;
+		randomCounter++;
+		if (randomCounter > gp.tickRate * randomIntervalInSeconds && spawnEnemys) {
+			fourEnemysEncirclePlayer();
+			randomCounter = 0;
+		}
+
+		int aliveEnemiesCounter = 0;
+		for (Entity e : entityList) {
+			if (e.isAlive && e.isHostile) {
+				aliveEnemiesCounter++;
 			}
 		}
 
-		int aliveCounter = 0;
-		for (Entity e : entityList) {
-			aliveCounter++;
-		}
-
-		if (aliveCounter <= 2) {
-			active = true;
+		if (aliveEnemiesCounter <= 0) {
+			spawnEnemys = true;
+		}else{
+			spawnEnemys = false;
+			randomCounter = 0;
 		}
 
 		for (Entity entity : entityList) {
@@ -111,6 +124,8 @@ public class EntityManager {
 	}
 
 	public void draw(Graphics2D g2) {
+		drawOrderBubbleSort();
+
 		switch (gp.gamestate) {
 			case 1, 3, 31 -> entityList.forEach(entity -> {
 				entity.draw(g2);

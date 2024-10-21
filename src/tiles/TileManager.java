@@ -1,6 +1,6 @@
 package tiles;
 
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,7 +31,7 @@ public class TileManager
 		loadMap("/maps/map01.txt");
 	}
 
-	private synchronized void getTileImage()
+	private void getTileImage()
 	{
 		try {
 			tile[100] = new Tile();
@@ -40,7 +40,7 @@ public class TileManager
 			tile[101].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/grass/Grass_2.png")));
 			tile[102] = new Tile();
 			tile[102].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/grass/Grass_3.png")));
-			
+
 			tile[200] = new Tile();
 			tile[200].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/dirt/Dirt_1.png")));
 			tile[201] = new Tile();
@@ -50,14 +50,14 @@ public class TileManager
 
 			tile[210] = new Tile();
 			tile[210].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/dirtpath/Dirtpatht_1.png")));
-			
+
 			tile[300] = new Tile();
 			tile[300].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/sand/Sand_1.png")));
 			tile[301] = new Tile();
 			tile[301].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/sand/Sand_2.png")));
 			tile[302] = new Tile();
 			tile[302].image = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/tiles/sand/Sand_3.png")));
-			
+
 			//tile[400] = new Tile();
 			//tile[400].image = ImageIO.read(getClass().getResourceAsStream("/tiles/wall.png"));
 			tile[700] = new Tile();
@@ -72,7 +72,7 @@ public class TileManager
 		}
 	}
 
-	protected synchronized void spriteCounter(int num)
+	protected void spriteCounter(int num)
 	{
 		spriteCounter++;
 		int time = switch (num)
@@ -94,7 +94,7 @@ public class TileManager
 		}
 	}
 
-	private synchronized void loadMap(String filePath)
+	private void loadMap(String filePath)
 	{
 		try
 		{
@@ -105,7 +105,7 @@ public class TileManager
 			int row = 0;
 
 			while (col < gp.maxWorldCol && row < gp.maxWorldRow) {
-				
+
 				for (String line = br.readLine(); col < gp.maxWorldCol; col++) {
 					String[] numbers = line.split(" ");
 					int num = Integer.parseInt(numbers[col]);
@@ -125,7 +125,7 @@ public class TileManager
 							break;
 						}
 					}
-					
+
 					if(num == 200)
 					{
 						try {
@@ -151,10 +151,10 @@ public class TileManager
 								break;
 						}
 					}
-					
+
 					if(num == 300)
 					{
-						switch(rd.nextInt(0,5)) 
+						switch(rd.nextInt(0,5))
 						{
 						default:
 							mapTileNumber[col][row] += 0;
@@ -168,7 +168,7 @@ public class TileManager
 						}
 					}
 				}
-				
+
 				if (col == gp.maxWorldCol) {
 					col = 0;
 					row++;
@@ -180,43 +180,59 @@ public class TileManager
 		catch (Exception e) {e.printStackTrace(); }
 	}
 
-	public synchronized void update()
+	void update()
 	{
 		spriteCounter(2);
 	}
-	
-	public synchronized void draw(Graphics2D g2) {
-		
-		for (int row = 0; row < gp.maxWorldRow; row++)
-		{
-			for (int col = 0; col < gp.maxWorldCol; col++)
-			{
-				tileNum = mapTileNumber[col][row];
-				
-				double worldX = col * gp.tileSize;
-				double worldY = row * gp.tileSize;
-				int screenX = (int) (worldX - gp.player.worldX + gp.player.screenX);
-				int screenY = (int) (worldY - gp.player.worldY + gp.player.screenY); 
-				
-				if (worldX + gp.tileSize > gp.player.worldX - gp.player.screenX &&
-					worldX - gp.tileSize < gp.player.worldX + gp.player.screenX &&
-					worldY + gp.tileSize > gp.player.worldY - gp.player.screenY &&
-					worldY - gp.tileSize < gp.player.worldY + gp.player.screenY)
-				{
-					switch (tileNum)
-					{
-						case 700 :
-							if (spriteNum == 1) {
-								tileNum = 700;
-							}
-							if (spriteNum == 2) {
-								tileNum = 701;
-							}
-					}
-					
-					g2.drawImage(tile[tileNum].image, screenX, screenY,
-							gp.tileSize, gp.tileSize, null);
+
+	public void draw(Graphics2D g2) {
+		// Disable antialiasing for pixel-perfect rendering
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+		g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+
+		// Calculate the offset for centering
+		int offsetX = gp.screenWidth / 2 - gp.tileSize / 2;
+		int offsetY = gp.screenHeight / 2 - gp.tileSize / 2;
+
+		// Calculate the player's position in tile coordinates
+		int playerWorldCol = (int) Math.floor(gp.player.worldX / gp.tileSize);
+		int playerWorldRow = (int) Math.floor(gp.player.worldY / gp.tileSize);
+
+		// Calculate the number of tiles that can fit on the screen
+		int tilesAcross = gp.screenWidth / gp.tileSize + 2;
+		int tilesDown = gp.screenHeight / gp.tileSize + 2;
+
+		// Calculate the starting and ending columns and rows to render
+		int startCol = playerWorldCol - tilesAcross / 2;
+		int endCol = startCol + tilesAcross;
+		int startRow = playerWorldRow - tilesDown / 2;
+		int endRow = startRow + tilesDown;
+
+		// Adjust for world boundaries
+		startCol = Math.max(0, startCol);
+		endCol = Math.min(gp.maxWorldCol - 1, endCol);
+		startRow = Math.max(0, startRow);
+		endRow = Math.min(gp.maxWorldRow - 1, endRow);
+
+		// Calculate the pixel offset within the current tile
+		int xOffset = (int) (gp.player.worldX % gp.tileSize);
+		int yOffset = (int) (gp.player.worldY % gp.tileSize);
+
+		for (int worldRow = startRow; worldRow <= endRow; worldRow++) {
+			for (int worldCol = startCol; worldCol <= endCol; worldCol++) {
+				int tileNum = mapTileNumber[worldCol][worldRow];
+
+				int screenX = (worldCol - playerWorldCol) * gp.tileSize + offsetX - xOffset;
+				int screenY = (worldRow - playerWorldRow) * gp.tileSize + offsetY - yOffset;
+
+				// Handle animated tiles
+				if (tileNum == 700) {
+					tileNum = (spriteNum == 1) ? 700 : 701;
 				}
+
+				// Draw the tile
+				g2.drawImage(tile[tileNum].image, screenX, screenY, gp.tileSize, gp.tileSize, null);
 			}
 		}
 	}

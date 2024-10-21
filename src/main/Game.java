@@ -1,10 +1,6 @@
 package main;
 
 import java.awt.*;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Toolkit;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Objects;
 
@@ -18,7 +14,7 @@ public class Game
 	public JFrame window;
 	public GamePanel gamePanel = new GamePanel(this,false);
 	Image icon;
-	boolean closed = false;
+	public boolean closed = false;
 
 	public static void infoBox(String infoMessage, String titleBar)
     {

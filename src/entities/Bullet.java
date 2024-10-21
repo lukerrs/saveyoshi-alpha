@@ -9,7 +9,6 @@ public class Bullet extends Entity{
 	String type;
 	double xSpeed;
 	double ySpeed;
-	double angle;
 	
 	public Bullet(double worldX, double worldY, int damage,double speed, double angle, GamePanel gp, KeyHandler keyH)
 	{
@@ -38,6 +37,9 @@ public class Bullet extends Entity{
 	
 	public void draw(Graphics2D g2)
 	{
+		screenX = (int) (worldX - gp.player.worldX + gp.player.screenX);
+		screenY = (int) (worldY - gp.player.worldY + gp.player.screenY);
+
 		g2.setColor(Color.yellow);
 		g2.fillRect(screenX,screenY,width, height);
 	}
@@ -51,8 +53,9 @@ public class Bullet extends Entity{
 		worldX += xSpeed;
 		worldY += ySpeed;
 
-		screenX = (int) (worldX - gp.player.worldX + gp.player.screenX);
-		screenY = (int) (worldY - gp.player.worldY + gp.player.screenY);
+		if(worldX < 0 || worldX > gp.worldWidth || worldY < 0 || worldY > gp.worldHeight){
+			this.die();
+		}
 	}
 }
 

@@ -64,7 +64,7 @@ public abstract class Entity {
 		isAlive = true;
 	}
 
-	protected synchronized void drawShadow(Entity entity, Graphics2D g2)
+	protected void drawShadow(Entity entity, Graphics2D g2)
 	{
 		g2.setColor(new Color(0.0F, 0.0F, 0.0F, 0.3F));
 		g2.fillOval(entity.screenX + entity.hitbox.x,
@@ -72,7 +72,7 @@ public abstract class Entity {
 				entity.hitbox.height / 2);
 	}
 
-	public synchronized void drawHealthbar(Entity entity, Graphics2D g2)
+	public void drawHealthbar(Entity entity, Graphics2D g2)
 	{
 		if(isAlive)
 		{
@@ -96,36 +96,28 @@ public abstract class Entity {
 		}
 	}
 	
-	protected synchronized void takeDamage(int damage)
+	protected void takeDamage(int damage)
 	{
 		health -= damage;
 	}
 
-	protected synchronized void die()
+	protected void die()
 	{
 		isAlive = false;
 		gp.entityManager.entityList.remove(this);
 	}
 
-	protected synchronized void spriteCounter(int num) {
+	protected void spriteCounter(int num) {
 		spriteCounter++;
-		int time = num;
-		switch (num) {
-			case 2:
-				time = 30;
-				break;
-			case 3:
-				time = 25;
-				break;
-			case 4:
-				time = 20;
-				break;
-			case 8 :
-				time = 10;
-				break;
-		}
+		int time = switch (num) {
+            case 2 -> 30;
+            case 3 -> 25;
+            case 4 -> 20;
+            case 8 -> 10;
+            default -> throw new IllegalStateException("Unexpected value: " + num);
+        };
 
-		if (spriteCounter > time) {
+        if (spriteCounter > time) {
 			spriteNum++;
 			spriteCounter = 0;
 		}

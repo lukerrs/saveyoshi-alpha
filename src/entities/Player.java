@@ -18,7 +18,7 @@ public class Player extends Entity {
 		init();
 	}
 
-	private synchronized void init()
+	private void init()
 	{
 		getPlayerImage();
 		inv = new ItemManager(this.gp, this.keyH);
@@ -90,7 +90,7 @@ public class Player extends Entity {
 
 		try {
 			gp.colC.checkTile(this);
-		} catch (Exception e) { }
+		} catch (Exception ignored) { }
 		
 		if (!collision && isMoving) {
 			if (Objects.equals(direction, "up")) worldY -= speed;

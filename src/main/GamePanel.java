@@ -3,17 +3,21 @@ package main;
 import entities.*;
 import menu.Menu;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Toolkit;
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
+import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JPanel;
 import tiles.TileManager;
 
@@ -23,7 +27,7 @@ import static java.lang.Thread.sleep;
 public class GamePanel extends JPanel {
 	private static final String Version = "0.1";
 	public int originalTileSize = 64;
-	public double scale = 1.6;
+	public double scale = 1.5;
 	public int tileSize = (int) (originalTileSize * scale);
 	public int screenWidth;
 	public int screenHeight;
@@ -31,8 +35,8 @@ public class GamePanel extends JPanel {
 	public final int maxWorldRow = 50;
 	public final double worldWidth = maxWorldCol * tileSize;
 	public final double worldHeight = maxWorldRow * tileSize;
-	public int tickRate = 128;
-	public int refreshRate = 540;
+	public int tickRate = 120;
+	public int refreshRate = 60;
 	public int gamestate = 0;
 	public int mouseX = 0;
 	public int mouseY = 0;
@@ -47,11 +51,12 @@ public class GamePanel extends JPanel {
 	public Camera cam;
 	public Menu menu;
 	public EntityManager entityManager;
-
 	public SoundPlayer soundP;
 	public Dimension screenSize;
 	public int prvGamestate;
 	public boolean pinkTeint;
+	public Map<String, List<BufferedImage>> textureCache;
+	public Map<String, List<AudioInputStream>> soundCache;
 
 	public final Thread gamePanelThread = new Thread(new Runnable() {
 		final double updateInterval = ((double) 1000000000 / tickRate);
@@ -73,10 +78,18 @@ public class GamePanel extends JPanel {
 
 	public final Thread drawGraphicsThread = new Thread(new Runnable() {
 		final double updateInterval = ((double) 1000000000 / refreshRate);
-		final double nextUpdateTime = System.nanoTime() + updateInterval;
+		double nextUpdateTime = System.nanoTime() + updateInterval;
 		public void run() {
 			while(!game.closed) {
 					repaint();
+			}
+			try {
+				double remainingTime = nextUpdateTime - System.nanoTime();
+				remainingTime /= 1000000;
+				if (remainingTime < 0) remainingTime = 0;
+				sleep((long) remainingTime);
+				nextUpdateTime += updateInterval;
+			} catch (InterruptedException ignored) {
 			}
 		}
 	});
@@ -85,15 +98,24 @@ public class GamePanel extends JPanel {
 		this.game = game;
 		this.fullscreen = fullscreen;
 		init();
+		setDoubleBuffered(true);
 	}
 
-	private synchronized void init() {
+	private void init() {
 		setScreenSize();
 		setBackground(Color.darkGray);
 		setDoubleBuffered(false);
 		setFocusable(true);
 		requestFocus();
-		keyH = new KeyHandler();
+		textureCache = new HashMap<>();
+		soundCache = new HashMap<>();
+        try {
+            preloadTextures();
+			preloadSounds();
+        } catch (IOException | UnsupportedAudioFileException e) {
+            throw new RuntimeException(e);
+        }
+        keyH = new KeyHandler();
 		pinkTeint = true;
 		menu = new Menu(this,keyH);
 		addKeyListener(keyH);
@@ -108,10 +130,31 @@ public class GamePanel extends JPanel {
 		yoshi = new Companion(this, keyH);
 		//e1 = new Enemy(this, keyH);
 		entityManager = new EntityManager(this, keyH);
-		soundP = new SoundPlayer();
+		soundP = new SoundPlayer(this);
 	}
 
-	public synchronized void setScreenSize()
+	private void preloadTextures() throws IOException {
+		// Load textures and save to cache
+		textureCache.put("enemy1", List.of(
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_3.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_4.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_5.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_6.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_7.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_8.png")))
+		));
+	}
+
+	private void preloadSounds() throws UnsupportedAudioFileException, IOException {
+		// Load sounds and save to cache
+		soundCache.put("ak-47", List.of(
+		AudioSystem.getAudioInputStream(new File("res/audio/ak47_shot.wav").getAbsoluteFile())
+		));
+	}
+
+	public void setScreenSize()
 	{
 		if (fullscreen)
 		{
@@ -162,17 +205,21 @@ public class GamePanel extends JPanel {
 	{
 		switch (gamestate)
 		{
+			//Menu
 			case 0 :
 				menu.update();
 				break;
+			//In Game
 			case 1, 2:
 				switchMode();
-				tileM.update();
-				entityManager.update();
+				if (!entityManager.isAlive()) {
+					entityManager.start();
+				}
 				break;
 			case 11 :
 				switchMode();
 				break;
+			//Pause menu
             case 3, 31:
 				switchMode();
 				menu.update();
@@ -246,8 +293,7 @@ public class GamePanel extends JPanel {
 		return new Point(mouseXRelativeToMap,mouseYRelativeToMap);
 	}
 
-	public synchronized void resetWindowSize() throws InterruptedException
-	{
+	public void resetWindowSize() {
 		gamestate = 311;
 		game.window.remove(this);
 		game.window.dispose();

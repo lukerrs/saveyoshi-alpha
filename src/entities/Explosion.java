@@ -10,7 +10,7 @@ public class Explosion extends Entity{
 	int r;
 	double liveTime;
 	
-	public Explosion(double worldX, double worldY, int r, int damage, GamePanel gp, KeyHandler keyH){
+	public Explosion(int worldX, int worldY, int r, int damage, GamePanel gp, KeyHandler keyH){
 		super(gp, keyH);
 		this.worldX = worldX;
 		this.worldY = worldY;
@@ -20,11 +20,11 @@ public class Explosion extends Entity{
 		this.damage = damage;
 	}
 	
-	public synchronized void update() {
+	public void update() {
 		
 	}
 	
-	public synchronized void draw(Graphics2D g2)
+	public void draw(Graphics2D g2)
 	{
 		int x = gp.getMousePosOnMap().x;
 		int y = gp.getMousePosOnMap().y;

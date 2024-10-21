@@ -1,8 +1,5 @@
 package main;
 
-import java.awt.Point;
-import java.awt.Rectangle;
-
 import entities.Bullet;
 import entities.Entity;
 

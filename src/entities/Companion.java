@@ -20,10 +20,10 @@ public class Companion extends Entity {
 		init();
 	}
 
-	private synchronized void init() {
+	private void init() {
 		getCompanionImage();
-		worldX = gp.tileSize * gp.maxWorldCol / 2 - gp.tileSize;
-		worldY = gp.tileSize * gp.maxWorldRow / 2 - gp.tileSize;
+		worldX = (double) (gp.tileSize * gp.maxWorldCol) / 2 - gp.tileSize;
+		worldY = (double) (gp.tileSize * gp.maxWorldRow) / 2 - gp.tileSize;
 		width = gp.tileSize;
 		height = gp.tileSize;
 		speed = 1 * gp.scale;
@@ -91,7 +91,7 @@ public class Companion extends Entity {
 		}
 	}
 
-	private synchronized void follow(int followInterval) {
+	private void follow(int followInterval) {
 		followCounter++;
 		boolean isInProximity = false;
 		if (followCounter > followInterval && !isInProximity ^ !gp.player.isMoving)
@@ -116,7 +116,7 @@ public class Companion extends Entity {
 		}
 	}
 
-	public synchronized void update() {
+	public void update() {
 		old_direction = direction;
 		randomMovement(512);
 		follow(1024);
@@ -124,7 +124,7 @@ public class Companion extends Entity {
 
 		try {
 			gp.colC.checkTile(this);
-		} catch (Exception e) { }
+		} catch (Exception ignored) { }
 		
 		if (!collision) {
 			if (direction == "up") worldY -= speed;
@@ -138,7 +138,7 @@ public class Companion extends Entity {
 		spriteCounter(4);
 	}
 
-	public synchronized void draw(Graphics2D g2) {
+	public void draw(Graphics2D g2) {
 		drawShadow(this, g2);
 		BufferedImage image = null;
 		switch (direction) {

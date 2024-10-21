@@ -1,6 +1,5 @@
 package items;
 
-import java.awt.Graphics2D;
 import java.io.IOException;
 import java.util.Objects;
 
