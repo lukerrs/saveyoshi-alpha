@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import javax.imageio.ImageIO;
 
@@ -48,59 +49,40 @@ public class Player extends Entity {
 
 	private void getPlayerImage()
 	{
-		try {
-			s1u = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_up_1.png")));
-			s2u = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_up_2.png")));
-			u1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_up_1.png")));
-			u2 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_up_2.png")));
-			s1d = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_down_1.png")));
-			s2d = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_down_2.png")));
-			d1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_down_1.png")));
-			d2 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_down_2.png")));
-			sl = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_left.png")));
-			l1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_left_1.png")));
-			l2 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_left_2.png")));
-			sr = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_right.png")));
-			r1 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_right_1.png")));
-			r2 = ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_right_2.png")));
-			
-			/*s1u = ImageIO.read(getClass().getResourceAsStream("/player/Serena_back_still.png"));
-			s2u = ImageIO.read(getClass().getResourceAsStream("/player/Serena_back_still.png"));
-			u1 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_back_run_1.png"));
-			u2 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_back_run_3.png"));
-			s1d = ImageIO.read(getClass().getResourceAsStream("/player/Serena_front_still.png"));
-			s2d = ImageIO.read(getClass().getResourceAsStream("/player/Serena_front_still.png"));
-			d1 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_front_run_1.png"));
-			d2 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_front_run_3.png"));
-			sl = ImageIO.read(getClass().getResourceAsStream("/player/Serena_still_l.png"));
-			l1 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_run_l1.png"));
-			l2 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_run_l2.png"));
-			sr = ImageIO.read(getClass().getResourceAsStream("/player/Serena_still_r.png"));
-			r1 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_run_r1.png"));
-			r2 = ImageIO.read(getClass().getResourceAsStream("/player/Serena_run_r2.png"));*/
-			
-			System.out.println("Success: Successfully loaded player resources");
-		} catch (IOException e) {
-			System.out.println("Error: Couldn't load player resources");
-		}
+		List<BufferedImage> textures = gp.textureCache.get("player");
+
+		s1u = textures.get(0);
+		s2u = textures.get(1);
+		u1 = textures.get(2);
+		u2 = textures.get(3);
+		s1d = textures.get(4);
+		s2d = textures.get(5);
+		d1 = textures.get(6);
+		d2 = textures.get(7);
+		sl = textures.get(8);
+		l1 = textures.get(9);
+		l2 = textures.get(10);
+		sr = textures.get(11);
+		r1 = textures.get(12);
+		r2 = textures.get(13);
+
+		System.out.println("Success: Successfully loaded player resources out of cache");
 	}
 
 	private void move() {
 		collision = false;
 
-		try {
-			gp.colC.checkTile(this);
-		} catch (Exception ignored) { }
+		collision = gp.colC.checkTile(this) || gp.colC.checkEntities(this);
 		
 		if (!collision && isMoving) {
 			if (Objects.equals(direction, "up")) worldY -= speed;
 			else if (Objects.equals(direction, "down")) worldY += speed;
 			else if (Objects.equals(direction, "right")) worldX += speed;
 			else if (Objects.equals(direction, "left")) worldX -= speed;
-			else if (Objects.equals(direction, "upright")) { worldX += speed/2; worldY -= speed * 3/4; }
-			else if (Objects.equals(direction, "upleft")) { worldX -= speed/2; worldY -= speed * 3/4; }
-			else if (Objects.equals(direction, "downright")) { worldX += speed/2; worldY += speed * 3/4; }
-			else if (Objects.equals(direction, "downleft")) { worldX -= speed/2; worldY += speed * 3/4; }
+			else if (Objects.equals(direction, "upright")) { worldX += speed * 2/3; worldY -= speed * 2/3; }
+			else if (Objects.equals(direction, "upleft")) { worldX -= speed * 2/3; worldY -= speed * 2/3; }
+			else if (Objects.equals(direction, "downright")) { worldX += speed * 2/3; worldY += speed * 2/3; }
+			else if (Objects.equals(direction, "downleft")) { worldX -= speed * 2/3; worldY += speed * 2/3; }
 		} else {
 			isMoving = false;
 		}
@@ -149,25 +131,13 @@ public class Player extends Entity {
 				if (spriteNum == 3) image = s1u;
 				if (spriteNum == 4) image = s2u;
 				break;
-			case "up" :
+			case "up", "upright", "upleft":
 				if (spriteNum == 1) image = u1;
 				if (spriteNum == 2) image = s1u;
 				if (spriteNum == 3) image = u2;
 				if (spriteNum == 4) image = s2u;
 				break;
-			case "upleft" :
-				if (spriteNum == 1) image = u1;
-				if (spriteNum == 2) image = s1u;
-				if (spriteNum == 3) image = u2;
-				if (spriteNum == 4) image = s2u;
-				break;
-			case "upright" :
-				if (spriteNum == 1) image = u1;
-				if (spriteNum == 2) image = s1u;
-				if (spriteNum == 3) image = u2;
-				if (spriteNum == 4) image = s2u;
-				break;
-			case "down", "downleft", "downright":
+            case "down", "downleft", "downright":
 				if (spriteNum == 1) image = d1;
 				if (spriteNum == 2) image = s1d;
 				if (spriteNum == 3) image = d2;

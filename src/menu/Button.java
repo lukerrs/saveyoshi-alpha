@@ -64,8 +64,8 @@ public class Button
 		
 		switch (name) {
 			case "Exit" :
-				height = (int) (30*gp.scale);
-				width = (int) (30*gp.scale);
+				height = 30;
+				width = 30;
 				screenX = gp.screenWidth - width - gp.screenWidth /20;
 				screenY = gp.screenHeight /20;
 				break;
@@ -160,15 +160,15 @@ public class Button
 					case "Back":
 						switch (gp.gamestate)
 						{
-						default:
-							keyH.m1 = false;
-							gp.setGamestate(gp.prvGamestate);
-							break;
-						case 3:
+                            case 3:
 							keyH.m1 = false;
 							gp.setGamestate(1);
 							break;
-						}
+                            default:
+                                keyH.m1 = false;
+                                gp.setGamestate(gp.prvGamestate);
+                                break;
+                        }
 					case "Scaling":
 						keyH.m1 = false;
 						break;

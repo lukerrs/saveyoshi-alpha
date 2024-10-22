@@ -70,6 +70,9 @@ public class Enemy extends Entity {
 			spriteCounter(8);
 			if(health <= 0) die();
 			follow();
+
+			collision = gp.colC.checkTile(this) || gp.colC.checkEntities(this);
+
 			if (!collision) {
 				if (direction == "up") worldY -= speed;
 				else if (direction == "down") worldY += speed;

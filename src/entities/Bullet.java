@@ -25,8 +25,8 @@ public class Bullet extends Entity{
 		hitbox = new Rectangle();
 		hitbox.x = (int) (0 * gp.scale);
 		hitbox.y = (int) (0 * gp.scale);
-		hitbox.width = (int) width;
-		hitbox.height = (int) height;
+		hitbox.width = width;
+		hitbox.height = height;
 		gp.entityManager.entityList.add(this);
 	}
 

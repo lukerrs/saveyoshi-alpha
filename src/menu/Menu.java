@@ -44,7 +44,7 @@ public class Menu
 	
 	public synchronized void init()
 	{
-		textSize = (int) (70 * gp.scale);
+		textSize = 100;
 		font = new Font("RuneScape UF", Font.PLAIN, textSize);
 		start = new Button( "Start", "PLAY", gp, keyH);
 		exit = new Button("Exit", gp, keyH);
@@ -91,7 +91,7 @@ public class Menu
 	
 	public void drawCursor(Graphics2D g2)
 	{
-		int curWH = gp.tileSize;
+		int curWH = gp.originalTileSize;
 		int cursorX = gp.mouseX - curWH / 6;
 		int cursorY = gp.mouseY - curWH / 6;
 		g2.drawImage(cursor, cursorX, cursorY, curWH, curWH, null);
@@ -99,7 +99,7 @@ public class Menu
 	
 	public void drawCrosshair(Graphics2D g2)
 	{
-		int crossWH = gp.tileSize / 2;
+		int crossWH = gp.originalTileSize;
 		int crosshairX = gp.mouseX - crossWH / 2;
 		int crosshairY = gp.mouseY - crossWH / 2;
 		g2.drawImage(crosshair, crosshairX, crosshairY, crossWH, crossWH, null);

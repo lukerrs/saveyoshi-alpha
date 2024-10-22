@@ -114,16 +114,16 @@ public class TileManager
 					{
 						switch(rd.nextInt(0,4))
 						{
-						default:
-							mapTileNumber[col][row] += 1;
-							break;
-						case 3:
+                            case 3:
 							mapTileNumber[col][row] += 0;
 							break;
 						case 4:
 							mapTileNumber[col][row] += 2;
 							break;
-						}
+                            default:
+                                mapTileNumber[col][row] += 1;
+                                break;
+                        }
 					}
 
 					if(num == 200)
@@ -140,32 +140,32 @@ public class TileManager
 
 						switch (rd.nextInt(0, 4))
 						{
-							default:
-								mapTileNumber[col][row] += 0;
-								break;
-							case 2:
+                            case 2:
 								mapTileNumber[col][row] += 1;
 								break;
 							case 3:
 								mapTileNumber[col][row] += 2;
 								break;
-						}
+                            default:
+                                mapTileNumber[col][row] += 0;
+                                break;
+                        }
 					}
 
 					if(num == 300)
 					{
 						switch(rd.nextInt(0,5))
 						{
-						default:
-							mapTileNumber[col][row] += 0;
-							break;
-						case 3:
+                            case 3:
 							mapTileNumber[col][row] += 1;
 							break;
 						case 4:
 							mapTileNumber[col][row] += 2;
 							break;
-						}
+                            default:
+                                mapTileNumber[col][row] += 0;
+                                break;
+                        }
 					}
 				}
 

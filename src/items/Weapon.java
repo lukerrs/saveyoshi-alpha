@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.Objects;
 import javax.imageio.ImageIO;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
 
 import entities.Bullet;
 import main.Camera;
@@ -18,7 +17,7 @@ public class Weapon extends Item {
 	private final KeyHandler keyH;
 	private final String model;
 	private int rpm;
-	private int magazineSize, bulletsInMag;
+	public int magazineSize, bulletsInMag;
 	private double shootCounter, shootCounterMax;
 	private boolean reloading, bulletInChamber;
 	private long reloadTime;

@@ -96,7 +96,7 @@ public abstract class Entity {
 		}
 	}
 	
-	protected void takeDamage(int damage)
+	public void takeDamage(int damage)
 	{
 		health -= damage;
 	}

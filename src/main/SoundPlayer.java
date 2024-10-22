@@ -2,9 +2,7 @@ package main;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.Scanner;
 
 import javax.sound.sampled.AudioInputStream;
@@ -70,17 +68,6 @@ public class SoundPlayer
 	// Method to play the audio
 	public void play()
 	{
-		if(Objects.equals(status, "play")){
-            try {
-                Clip newClip = AudioSystem.getClip();
-				newClip.open(audioInputStream);
-				newClip.setFramePosition(0);
-				newClip.start();
-            } catch (LineUnavailableException | IOException e) {
-                throw new RuntimeException(e);
-            }
-
-        }
 		FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 		gainControl.setValue(-10.0f); // Reduce volume by 10 decibels
 		clip.setFramePosition(0); // Reset the frame position to the beginning

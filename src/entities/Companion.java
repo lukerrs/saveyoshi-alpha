@@ -4,6 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import javax.imageio.ImageIO;
 import main.GamePanel;
@@ -26,7 +28,6 @@ public class Companion extends Entity {
 		worldY = (double) (gp.tileSize * gp.maxWorldRow) / 2 - gp.tileSize;
 		width = gp.tileSize;
 		height = gp.tileSize;
-		speed = 1 * gp.scale;
 		health = 100;
 		healthMax = health;
 		direction = "stilldown";
@@ -44,24 +45,24 @@ public class Companion extends Entity {
 	}
 
 	private void getCompanionImage() {
-		try {
-			u1 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_up_1.png"));
-			u2 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_up_2.png"));
-			s1d = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_idle_1.png"));
-			s2d = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_idle_2.png"));
-			s3d = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_idle_3.png"));
-			s4d = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_idle_4.png"));
-			d1 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_down_1.png"));
-			d2 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_down_2.png"));
-			sl = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_idle_left_1.png"));
-			l1 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_left_1.png"));
-			l2 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_left_2.png"));
-			sr = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_idle_right_1.png"));
-			r1 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_right_1.png"));
-			r2 = ImageIO.read(getClass().getResourceAsStream("/companion/yoshi_walk_right_2.png"));
-		} catch (IOException var2) {
-			var2.printStackTrace();
-		}
+		List<BufferedImage> textures = gp.textureCache.get("yoshi");
+
+		u1 = textures.get(0);
+		u2 = textures.get(1);
+		s1d = textures.get(2);
+		s2d = textures.get(3);
+		s3d = textures.get(4);
+		s4d = textures.get(5);
+		d1 = textures.get(6);
+		d2 = textures.get(7);
+		sl = textures.get(8);
+		l1 = textures.get(9);
+		l2 = textures.get(10);
+		sr = textures.get(11);
+		r1 = textures.get(12);
+		r2 = textures.get(13);
+
+		System.out.println("Success: Successfully loaded companion resources out of cache");
 	}
 
 	private void randomMovement(int randomInterval) {
@@ -82,7 +83,7 @@ public class Companion extends Entity {
 					case 3 :
 						direction = "right";
 				}
-			} else if (tempRd < 0.5F) {
+			} else if (tempRd > 0.5F) {
 				direction = "stilldown";
 			}
 			randomCounter = 0;
@@ -97,22 +98,20 @@ public class Companion extends Entity {
 		if (followCounter > followInterval && !isInProximity ^ !gp.player.isMoving)
 		{
 			randomize = false;
-			if (worldX + width/2 >= gp.player.worldX + gp.player.width + gp.tileSize) direction = "left";
-			if (worldX + width/2 <= gp.player.worldX - gp.tileSize) direction = "right";
+			if (worldX + (double) width /2 >= gp.player.worldX + gp.player.width + gp.tileSize) direction = "left";
+			if (worldX + (double) width /2 <= gp.player.worldX - gp.tileSize) direction = "right";
 			if (worldY >= gp.player.worldY + gp.player.height + gp.tileSize) direction = "up";
 			if (worldY <= gp.player.worldY - gp.tileSize) direction = "down";
 		}
-		else if (worldX >= gp.player.worldX - gp.tileSize/2
-				&& worldX <= gp.player.worldX + gp.player.width + gp.tileSize/2
-				&& worldY >= gp.player.worldY - gp.tileSize/2
-				&& worldY <= gp.player.worldY + gp.player.height + gp.tileSize/2)
+		else if (worldX >= gp.player.worldX - (double) gp.tileSize /2
+				&& worldX <= gp.player.worldX + gp.player.width + (double) gp.tileSize /2
+				&& worldY >= gp.player.worldY - (double) gp.tileSize /2
+				&& worldY <= gp.player.worldY + gp.player.height + (double) gp.tileSize /2)
 		{
 			isInProximity = true;
 			direction = "stilldown";
 			randomize = true;
 			followCounter = 0;
-		} else {
-			isInProximity = false;
 		}
 	}
 
@@ -122,9 +121,7 @@ public class Companion extends Entity {
 		follow(1024);
 		collision = false;
 
-		try {
-			gp.colC.checkTile(this);
-		} catch (Exception ignored) { }
+		collision = gp.colC.checkTile(this) || gp.colC.checkEntities(this);
 		
 		if (!collision) {
 			if (direction == "up") worldY -= speed;

@@ -21,6 +21,7 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JPanel;
 import tiles.TileManager;
 
+import static java.lang.Thread.*;
 import static java.lang.Thread.sleep;
 
 @SuppressWarnings("unused")
@@ -46,7 +47,6 @@ public class GamePanel extends JPanel {
 	public CollisionChecker colC;
 	public Player player;
 	public Companion yoshi;
-	public Enemy e1;
 	public Game game;
 	public Camera cam;
 	public Menu menu;
@@ -87,7 +87,7 @@ public class GamePanel extends JPanel {
 				double remainingTime = nextUpdateTime - System.nanoTime();
 				remainingTime /= 1000000;
 				if (remainingTime < 0) remainingTime = 0;
-				sleep((long) remainingTime);
+				wait((long) remainingTime);
 				nextUpdateTime += updateInterval;
 			} catch (InterruptedException ignored) {
 			}
@@ -98,13 +98,12 @@ public class GamePanel extends JPanel {
 		this.game = game;
 		this.fullscreen = fullscreen;
 		init();
-		setDoubleBuffered(true);
 	}
 
 	private void init() {
 		setScreenSize();
 		setBackground(Color.darkGray);
-		setDoubleBuffered(false);
+		setDoubleBuffered(true);
 		setFocusable(true);
 		requestFocus();
 		textureCache = new HashMap<>();
@@ -135,6 +134,41 @@ public class GamePanel extends JPanel {
 
 	private void preloadTextures() throws IOException {
 		// Load textures and save to cache
+		textureCache.put("player", List.of(
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_up_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_up_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_up_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_up_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_down_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_down_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_down_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_down_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_left.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_left_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_left_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_still_right.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_right_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/player/Main_walk_right_2.png")))
+		));
+		System.out.println("Player resources successfully loaded into cache");
+
+		textureCache.put("yoshi", List.of(
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_up_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_up_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_idle_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_idle_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_idle_3.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_idle_4.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_down_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_down_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_idle_left_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_left_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_left_2.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_idle_right_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_right_1.png"))),
+		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/companion/yoshi_walk_right_2.png")))
+		));
+
 		textureCache.put("enemy1", List.of(
 		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_1.png"))),
 		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_2.png"))),
@@ -145,12 +179,13 @@ public class GamePanel extends JPanel {
 		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_7.png"))),
 		ImageIO.read(Objects.requireNonNull(getClass().getResourceAsStream("/enemy/Enemy_8.png")))
 		));
+		System.out.println("Player resources successfully loaded into cache");
 	}
 
 	private void preloadSounds() throws UnsupportedAudioFileException, IOException {
 		// Load sounds and save to cache
 		soundCache.put("ak-47", List.of(
-		AudioSystem.getAudioInputStream(new File("res/audio/ak47_shot.wav").getAbsoluteFile())
+		AudioSystem.getAudioInputStream(new File("res/audio/ak47_shot.wav"))
 		));
 	}
 

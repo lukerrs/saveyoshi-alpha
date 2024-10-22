@@ -1,8 +1,9 @@
 package items;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
+
 import main.GamePanel;
 import main.KeyHandler;
 
@@ -15,6 +16,8 @@ public class ItemManager {
 	public int selected;
 	private int imageOffset;
 	private int hotbarBoxSize;
+	private Font f;
+	private FontRenderContext frc;
 	
 
 	public ItemManager(GamePanel gp, KeyHandler keyH) {
@@ -31,6 +34,9 @@ public class ItemManager {
 		hotbarBoxSize = gp.tileSize / 2;
 		hotbar[0] = new Weapon("ak47",gp,keyH);
 		hotbar[1] = new Throwable("poison",gp,keyH);
+		f = new Font("RuneScape UF", Font.BOLD, gp.tileSize/2);
+		frc = new FontRenderContext(new AffineTransform(),true,true);
+
 	}
 
 	public void update() {
@@ -76,7 +82,7 @@ public class ItemManager {
 					for (int y = 0; y < 5; y++){
 						if (y != 4) {
 							g2.drawRect(
-									gp.tileSize + gp.tileSize * 3 + i * gp.tileSize,
+									gp.tileSize * 2 + i * gp.tileSize,
 									gp.tileSize + y * gp.tileSize,
 									gp.tileSize,
 									gp.tileSize);
@@ -118,7 +124,13 @@ public class ItemManager {
                                 null);
                     }
 
-
+					if(hotbar[i] instanceof Weapon && hotbar[i].inHand){
+						String ammoDisplay = ((Weapon) hotbar[i]).bulletsInMag + " | " + ((Weapon) hotbar[i]).magazineSize;
+						g2.setFont(f);
+						int width = (int) (f.getStringBounds(ammoDisplay, frc).getWidth()*1.5);
+						int height = (int) (f.getStringBounds(ammoDisplay, frc).getHeight()/2);
+						g2.drawString(ammoDisplay, gp.screenWidth - width, gp.screenHeight - height );
+					}
                 }
                 break;
         }
