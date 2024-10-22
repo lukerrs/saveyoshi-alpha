@@ -129,7 +129,8 @@ public class EntityManager extends Thread{
 		switch (gp.gamestate) {
 			case 1, 3, 31 -> entityList.forEach(entity -> {
 				entity.draw(g2);
-				if (entity.isHostile) {
+				if (entity.health != entity.healthMax &&
+					System.currentTimeMillis() - entity.lastTimeDamaged < 1000) {
 					entity.drawHealthbar(entity, g2);
 				}
 			});

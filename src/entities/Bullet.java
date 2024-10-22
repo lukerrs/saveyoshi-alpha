@@ -19,6 +19,7 @@ public class Bullet extends Entity{
 		this.height = width;
 		this.damage = damage;
 		this.speed = speed * gp.scale;
+		this.collidable = false;
 		this.xSpeed = speed * Math.cos(angle);
 		this.ySpeed = speed * Math.sin(angle);
 		isAlive = true;

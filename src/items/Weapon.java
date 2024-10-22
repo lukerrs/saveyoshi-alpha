@@ -10,7 +10,7 @@ import entities.Bullet;
 import main.Camera;
 import main.GamePanel;
 import main.KeyHandler;
-import main.SoundPlayer;
+import main.AudioPlayer;
 
 public class Weapon extends Item {
 	private final GamePanel gp;
@@ -22,7 +22,7 @@ public class Weapon extends Item {
 	private boolean reloading, bulletInChamber;
 	private long reloadTime;
 	private long keyPressTime;
-	private SoundPlayer soundP;
+	private AudioPlayer fireSound;
 
 	public Weapon(String name, GamePanel gp, KeyHandler keyH) {
 		this.model = name;
@@ -37,12 +37,14 @@ public class Weapon extends Item {
 		reloading = false;
 		bulletInChamber = true;
 		shootCounter = 0;
-		soundP = new SoundPlayer(gp);
 
 		try {
-			soundP.loadfile(gp.soundCache.get("ak-47"));
+			// Fire sound
+			fireSound = new AudioPlayer(gp);
+			fireSound.loadfile(gp.soundCache.get("ak-47"));
+			fireSound.setVolume(-40.0f);
 		} catch (IOException | LineUnavailableException e) {
-			throw new RuntimeException("Failed to load sound file", e);
+			throw new RuntimeException("Failed to load sound files", e);
 		}
 	}
 
@@ -91,7 +93,7 @@ public class Weapon extends Item {
 				gp.player.worldY + (double) gp.player.height / 2,
 				damage, 4, angle, gp, keyH);
 		System.out.println("SHOT!!! Bullets in mag: " + bulletsInMag);
-		soundP.play();
+		fireSound.play();
 	}
 
 	private void reload() {

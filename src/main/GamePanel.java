@@ -21,7 +21,6 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.JPanel;
 import tiles.TileManager;
 
-import static java.lang.Thread.*;
 import static java.lang.Thread.sleep;
 
 @SuppressWarnings("unused")
@@ -51,7 +50,7 @@ public class GamePanel extends JPanel {
 	public Camera cam;
 	public Menu menu;
 	public EntityManager entityManager;
-	public SoundPlayer soundP;
+	public AudioPlayer soundP;
 	public Dimension screenSize;
 	public int prvGamestate;
 	public boolean pinkTeint;
@@ -129,7 +128,7 @@ public class GamePanel extends JPanel {
 		yoshi = new Companion(this, keyH);
 		//e1 = new Enemy(this, keyH);
 		entityManager = new EntityManager(this, keyH);
-		soundP = new SoundPlayer(this);
+		soundP = new AudioPlayer(this);
 	}
 
 	private void preloadTextures() throws IOException {

@@ -142,7 +142,8 @@ public class CollisionChecker {
 			if(nextX + entity.hitbox.x < e.worldX + e.hitbox.x + e.hitbox.width &&
 					nextX + entity.hitbox.x + entity.hitbox.width > e.worldX + e.hitbox.x &&
 					nextY + entity.hitbox.y < e.worldY + e.hitbox.y + e.hitbox.height &&
-					nextY + entity.hitbox.y + entity.hitbox.height > e.worldY + e.hitbox.y)
+					nextY + entity.hitbox.y + entity.hitbox.height > e.worldY + e.hitbox.y &&
+				e.collidable)
 			{
 				return true;
 			}

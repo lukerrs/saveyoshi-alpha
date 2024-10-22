@@ -54,14 +54,18 @@ public abstract class Entity {
 	public ItemManager inv;
 	public boolean isAlive;
 	public boolean isHostile;
+	public boolean collidable;
 	final GamePanel gp;
 	final KeyHandler keyH;
+	public long lastTimeDamaged;
+	public boolean drawingHealthbar;
 
 	public Entity(GamePanel gp, KeyHandler keyH)
 	{
 		this.gp = gp;
 		this.keyH = keyH;
 		isAlive = true;
+		collidable = true;
 	}
 
 	protected void drawShadow(Entity entity, Graphics2D g2)
@@ -99,6 +103,7 @@ public abstract class Entity {
 	public void takeDamage(int damage)
 	{
 		health -= damage;
+		lastTimeDamaged = System.currentTimeMillis();
 	}
 
 	protected void die()
