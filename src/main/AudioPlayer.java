@@ -4,38 +4,39 @@ import javax.sound.sampled.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioPlayer {
-	private List<AudioInputStream> audioInputStreams;
-	private List<Clip> activeClips;
+    private final List<Clip> activeClips;
 	private String status;
-	private GamePanel gp;
-	private byte[] audioData; // Store the audio data in memory
-	private AudioFormat audioFormat; // Store the audio format
-	private Clip preloadedClip;
+    private byte[] audioData;
+	private AudioFormat audioFormat;
 	private float volume;
+	private final ExecutorService audioThreadPool;
+	private final AtomicBoolean isPreloaded = new AtomicBoolean(false);
+	private Clip preloadedClip = null;
 
-	public AudioPlayer(GamePanel gp) {
-		this.gp = gp;
-		audioInputStreams = new ArrayList<>();
+	public AudioPlayer() {
+        this.audioThreadPool = AudioManager.getInstance().getThreadPool();
 		activeClips = new ArrayList<>();
 	}
 
 	public void loadfile(List<AudioInputStream> sounds) throws IOException, LineUnavailableException {
-		// Store the audio format
 		audioFormat = sounds.get(0).getFormat();
-
-		// Read the entire audio data into memory
 		audioData = sounds.get(0).readAllBytes();
-
-		// Close the original input stream
 		sounds.get(0).close();
-		preloadClip();
+
+		// Start preloading asynchronously
+		audioThreadPool.submit(this::preloadClipAsync);
 	}
 
-	private void preloadClip() {
+	private void preloadClipAsync() {
 		try {
-			// Create and open a clip immediately after loading the file
+			if (preloadedClip != null) {
+				preloadedClip.close();
+			}
+
 			AudioInputStream preloadStream = new AudioInputStream(
 					new java.io.ByteArrayInputStream(audioData),
 					audioFormat,
@@ -45,17 +46,9 @@ public class AudioPlayer {
 			preloadedClip = AudioSystem.getClip();
 			preloadedClip.open(preloadStream);
 
-			// Set the volume
-			FloatControl gainControl = (FloatControl) preloadedClip.getControl(FloatControl.Type.MASTER_GAIN);
-			gainControl.setValue(-50.0f);
+			setClipVolume(preloadedClip);
 
-			// Play and immediately stop to initialize the audio system
-			preloadedClip.start();
-			preloadedClip.stop();
-
-			// Close the preloaded clip
-			preloadedClip.close();
-			preloadStream.close();
+			isPreloaded.set(true);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -63,52 +56,80 @@ public class AudioPlayer {
 
 	public void setVolume(float volume) {
 		this.volume = volume;
-		// Apply to all active clips
 		for(Clip clip : activeClips) {
 			if(clip.isOpen()) {
-				FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-				gainControl.setValue(volume);
+				setClipVolume(clip);
 			}
 		}
 	}
 
-	public void play() {
+	private void setClipVolume(Clip clip) {
 		try {
-			// Create a new AudioInputStream from the stored audio data
-			AudioInputStream newStream = new AudioInputStream(
-					new java.io.ByteArrayInputStream(audioData),
-					audioFormat,
-					audioData.length / audioFormat.getFrameSize()
-			);
-
-			Clip newClip = AudioSystem.getClip();
-			newClip.open(newStream);
-
-			// Set volume for the new clip
-			FloatControl gainControl = (FloatControl) newClip.getControl(FloatControl.Type.MASTER_GAIN);
-			gainControl.setValue(volume);
-
-			// Add to active clips list before playing
-			activeClips.add(newClip);
-
-			// Start playing
-			newClip.start();
-
-			// Add listener to clean up when done
-			newClip.addLineListener(event -> {
-				if (event.getType() == LineEvent.Type.STOP) {
-					newClip.close();
-					activeClips.remove(newClip);
-				}
-			});
-
-			status = "play";
+			if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+				FloatControl gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+				gainControl.setValue(volume);
+			} else if (clip.isControlSupported(FloatControl.Type.VOLUME)) {
+				// Try VOLUME control as fallback
+				FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.VOLUME);
+				volumeControl.setValue(volume);
+			}
+			// If neither control is supported, the clip will play at default volume
 		} catch (Exception e) {
-			e.printStackTrace();
+			// Log the error but continue playing
+			System.out.println("Volume control not supported for this clip");
 		}
 	}
 
-	// Optional: Method to stop all playing clips
+	public void play() {
+		audioThreadPool.submit(() -> {
+			try {
+				Clip clipToUse;
+
+				if (isPreloaded.get() && preloadedClip != null) {
+					clipToUse = preloadedClip;
+					preloadedClip = null;
+					isPreloaded.set(false);
+				} else {
+					// Fallback to creating a new clip if preloaded isn't ready
+					AudioInputStream newStream = new AudioInputStream(
+							new java.io.ByteArrayInputStream(audioData),
+							audioFormat,
+							audioData.length / audioFormat.getFrameSize()
+					);
+					clipToUse = AudioSystem.getClip();
+					clipToUse.open(newStream);
+				}
+
+				// Set volume
+				try {
+					FloatControl gainControl = (FloatControl) clipToUse.getControl(FloatControl.Type.MASTER_GAIN);
+					gainControl.setValue(volume);
+				} catch (IllegalArgumentException e) {
+					// Ignore if volume control isn't available
+				}
+
+				// Add to active clips and play
+				activeClips.add(clipToUse);
+				clipToUse.start();
+
+				// Setup cleanup listener
+				clipToUse.addLineListener(event -> {
+					if (event.getType() == LineEvent.Type.STOP) {
+						clipToUse.close();
+						activeClips.remove(clipToUse);
+					}
+				});
+
+				// Start preloading the next clip
+				preloadClipAsync();
+
+				status = "play";
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
 	public void stopAll() {
 		for (Clip clip : activeClips) {
 			clip.stop();

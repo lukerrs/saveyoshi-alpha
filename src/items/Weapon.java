@@ -40,7 +40,7 @@ public class Weapon extends Item {
 
 		try {
 			// Fire sound
-			fireSound = new AudioPlayer(gp);
+			fireSound = new AudioPlayer();
 			fireSound.loadfile(gp.soundCache.get("ak-47"));
 			fireSound.setVolume(-40.0f);
 		} catch (IOException | LineUnavailableException e) {
@@ -113,7 +113,7 @@ public class Weapon extends Item {
 			case "ak47":
 				rpm = 360;
 				shootCounterMax = (double) (gp.tickRate * 60) / rpm;
-				damage = 10;
+				damage = 33;
 				magazineSize = 30;
 				bulletsInMag = magazineSize;
 				reloadTime = 3000;

@@ -160,15 +160,6 @@ public class CollisionChecker {
 			{
 				System.out.println("Enemy hit");
 				entity2.health -= entity1.damage;
-				
-				/*
-				Game.infoBox(
-						"explosionX: " + gp.getMousePosOnMap().x +
-						"   enemyX: " + entity2.worldX +
-						"\nexplosionY: " + gp.getMousePosOnMap().y +
-						"   enemyY: " + entity2.worldY,
-						"Mouse and Enemy Position");
-				*/
 			}
 	}
 
@@ -176,8 +167,8 @@ public class CollisionChecker {
 		if (entity != gp.player && entity != b &&
 			b.worldX < entity.worldX + entity.hitbox.x + entity.hitbox.width &&
 			b.worldX + b.width > entity.worldX + entity.hitbox.x &&
-			b.worldY < entity.worldY + entity.hitbox.y + entity.hitbox.height&&
-			b.worldY + b.height > entity.worldY - entity.hitbox.height)
+			b.worldY < entity.worldY + entity.hitbox.y + entity.hitbox.height &&
+			b.worldY + b.height > entity.worldY + entity.hitbox.y)
 		{
 			System.out.println("Enemy hit");
 			entity.takeDamage(b.damage);

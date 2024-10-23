@@ -23,7 +23,7 @@ public class Menu
 	KeyHandler keyH;
 	Button start;
 	Button exit;
-	Button settings, fullscreenSetting, scalingSetting, teintSetting, back;
+	Button settings, fullscreenSetting, scalingSetting, teintSetting, refreshRateSetting, back;
 	String state;
 	Font font;
 	int textSize;
@@ -42,7 +42,7 @@ public class Menu
 		loadMenuImages();
 	}
 	
-	public synchronized void init()
+	public void init()
 	{
 		textSize = 100;
 		font = new Font("RuneScape UF", Font.PLAIN, textSize);
@@ -53,10 +53,11 @@ public class Menu
 		fullscreenSetting = new Button("Fullscreen", "FULLSCREEN: " + gp.fullscreenToString().toUpperCase(), gp, keyH);
 		scalingSetting = new Button("Scaling", "SCALING: " + gp.scale, gp, keyH);
 		teintSetting = new Button("Teint", "PINK TEINT: " + gp.teintToString().toUpperCase(), gp, keyH);
+		refreshRateSetting = new Button("RefreshRate", "REFRESH RATE: " + gp.refreshRate, gp, keyH);
 		state = "mainmenu";
 	}
 	
-	private synchronized void loadMenuImages()
+	private void loadMenuImages()
 	{
 		try
 		{
@@ -221,6 +222,7 @@ public class Menu
 			scalingSetting.draw(g2);
 			fullscreenSetting.draw(g2);
 			teintSetting.draw(g2);
+			refreshRateSetting.draw(g2);
 			exit.draw(g2);
 			back.draw(g2);
 			drawCursor(g2);

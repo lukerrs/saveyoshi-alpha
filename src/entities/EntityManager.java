@@ -49,32 +49,34 @@ public class EntityManager extends Thread{
 
 	public void newRandomState() {
 		Random rnd = new Random();
-		switch (rnd.nextInt(1, 1)) {
+		switch (rnd.nextInt(1, 2)) {
 			case 1:
 				state = 1;
-				fourEnemysEncirclePlayer();
+				spawnSingleEnemy();
 				break;
 			case 2:
+				state = 2;
+				spawnSingleEnemy();
 				break;
 		}
 	}
 
 	public void spawnSingleEnemy(){
-
+		Random rnd = new Random();
+		int posOrNeg = rnd.nextBoolean() ? 1 : -1;
+		int x = (int) gp.player.worldX + posOrNeg * rnd.nextInt(gp.screenWidth/2, gp.screenWidth/2 + 200 );
+		int y = (int) gp.player.worldY + posOrNeg * rnd.nextInt(gp.screenHeight/2, gp.screenHeight/2 + 200 );
+		entityList.add(new Enemy(x,y,"greyGhost",gp, keyH));
 	}
 
 	public void fourEnemysEncirclePlayer() {
 		int x = (int) gp.player.worldX;
 		int y = (int) gp.player.worldY;
 		int spawnDistance = 3;
-		Enemy e1 = new Enemy(x + gp.tileSize * spawnDistance, y + gp.tileSize * spawnDistance, "greyGhost", gp, keyH);
-		entityList.add(e1);
-		Enemy e2 = new Enemy(x + gp.tileSize * spawnDistance, y - gp.tileSize * spawnDistance, "greyGhost", gp, keyH);
-		entityList.add(e2);
-		Enemy e3 = new Enemy(x - gp.tileSize * spawnDistance, y + gp.tileSize * spawnDistance, "greyGhost", gp, keyH);
-		entityList.add(e3);
-		Enemy e4 = new Enemy(x - gp.tileSize * spawnDistance, y - gp.tileSize * spawnDistance, "greyGhost", gp, keyH);
-		entityList.add(e4);
+		entityList.add(new Enemy(x + gp.tileSize * spawnDistance, y + gp.tileSize * spawnDistance, "greyGhost", gp, keyH));
+		entityList.add(new Enemy(x + gp.tileSize * spawnDistance, y - gp.tileSize * spawnDistance, "greyGhost", gp, keyH));
+		entityList.add(new Enemy(x - gp.tileSize * spawnDistance, y + gp.tileSize * spawnDistance, "greyGhost", gp, keyH));
+		entityList.add(new Enemy(x - gp.tileSize * spawnDistance, y - gp.tileSize * spawnDistance, "greyGhost", gp, keyH));
 	}
 
 	private void drawOrderBubbleSort() {
@@ -98,7 +100,7 @@ public class EntityManager extends Thread{
 	public void update() {
 		randomCounter++;
 		if (randomCounter > gp.tickRate * randomIntervalInSeconds && spawnEnemys) {
-			fourEnemysEncirclePlayer();
+			newRandomState();
 			randomCounter = 0;
 		}
 

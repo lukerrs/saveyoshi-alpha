@@ -115,10 +115,10 @@ public abstract class Entity {
 	protected void spriteCounter(int num) {
 		spriteCounter++;
 		int time = switch (num) {
-            case 2 -> 30;
-            case 3 -> 25;
-            case 4 -> 20;
-            case 8 -> 10;
+            case 2 -> 60;
+            case 3 -> 50;
+            case 4 -> 40;
+            case 8 -> 20;
             default -> throw new IllegalStateException("Unexpected value: " + num);
         };
 

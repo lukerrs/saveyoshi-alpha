@@ -3,16 +3,14 @@ package main;
 import entities.*;
 import menu.Menu;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
@@ -35,7 +33,7 @@ public class GamePanel extends JPanel {
 	public final int maxWorldRow = 50;
 	public final double worldWidth = maxWorldCol * tileSize;
 	public final double worldHeight = maxWorldRow * tileSize;
-	public int tickRate = 120;
+	public int tickRate = 240;
 	public int refreshRate = 60;
 	public int gamestate = 0;
 	public int mouseX = 0;
@@ -57,41 +55,43 @@ public class GamePanel extends JPanel {
 	public Map<String, List<BufferedImage>> textureCache;
 	public Map<String, List<AudioInputStream>> soundCache;
 
-	public final Thread gamePanelThread = new Thread(new Runnable() {
-		final double updateInterval = ((double) 1000000000 / tickRate);
-		double nextUpdateTime = System.nanoTime() + updateInterval;
-		public void run() {
+	private final ExecutorService gameThreadPool = Executors.newFixedThreadPool(2);
+
+	private void startGameLoops() {
+		// Game logic loop - 240Hz for very precise physics
+		gameThreadPool.submit(() -> {
+			final double updateInterval = ((double) 1000000000 / tickRate);
+			double nextUpdateTime = System.nanoTime() + updateInterval;
+
 			while(!game.closed) {
 				update();
 				try {
 					double remainingTime = nextUpdateTime - System.nanoTime();
 					remainingTime /= 1000000;
 					if (remainingTime < 0) remainingTime = 0;
-					sleep((long) remainingTime);
+					Thread.sleep((long) remainingTime);
 					nextUpdateTime += updateInterval;
-				} catch (InterruptedException ignored) {
-				}
+				} catch (InterruptedException ignored) {}
 			}
-		}
-	});
+		});
 
-	public final Thread drawGraphicsThread = new Thread(new Runnable() {
-		final double updateInterval = ((double) 1000000000 / refreshRate);
-		double nextUpdateTime = System.nanoTime() + updateInterval;
-		public void run() {
+		// Render loop - matching your monitor's refresh rate
+		gameThreadPool.submit(() -> {
+			final double updateInterval = ((double) 1000000000 / refreshRate);
+			double nextUpdateTime = System.nanoTime() + updateInterval;
+
 			while(!game.closed) {
-					repaint();
+				repaint();
+				try {
+					double remainingTime = nextUpdateTime - System.nanoTime();
+					remainingTime /= 1000000;
+					if (remainingTime < 0) remainingTime = 0;
+					Thread.sleep((long) remainingTime);
+					nextUpdateTime += updateInterval;
+				} catch (InterruptedException ignored) {}
 			}
-			try {
-				double remainingTime = nextUpdateTime - System.nanoTime();
-				remainingTime /= 1000000;
-				if (remainingTime < 0) remainingTime = 0;
-				wait((long) remainingTime);
-				nextUpdateTime += updateInterval;
-			} catch (InterruptedException ignored) {
-			}
-		}
-	});
+		});
+	}
 
 	public GamePanel(Game game, boolean fullscreen) {
 		this.game = game;
@@ -119,8 +119,11 @@ public class GamePanel extends JPanel {
 		addKeyListener(keyH);
 		addMouseListener(keyH);
 		addMouseWheelListener(keyH);
-		gamePanelThread.start();
-		drawGraphicsThread.start();
+
+		setRefreshRate();
+
+		startGameLoops();
+
 		cam = new Camera(this,keyH);
 		tileM = new TileManager(this);
 		colC = new CollisionChecker(this);
@@ -128,7 +131,21 @@ public class GamePanel extends JPanel {
 		yoshi = new Companion(this, keyH);
 		//e1 = new Enemy(this, keyH);
 		entityManager = new EntityManager(this, keyH);
-		soundP = new AudioPlayer(this);
+		soundP = new AudioPlayer();
+	}
+
+	public void setRefreshRate() {
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		GraphicsDevice gd = ge.getDefaultScreenDevice();
+		DisplayMode dm = gd.getDisplayMode();
+		refreshRate = dm.getRefreshRate();
+
+		// Fallback if we can't detect it
+		if (refreshRate == DisplayMode.REFRESH_RATE_UNKNOWN || refreshRate < 60) {
+			refreshRate = 60;
+		}
+
+		System.out.println("Display refresh rate set to: " + refreshRate + "Hz");
 	}
 
 	private void preloadTextures() throws IOException {
@@ -261,6 +278,7 @@ public class GamePanel extends JPanel {
             case 311:
 				break;
 			case 999:
+				AudioManager.getInstance().shutdown();
 				System.exit(0);
 				break;
 		}

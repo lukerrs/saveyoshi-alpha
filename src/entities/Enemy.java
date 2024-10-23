@@ -30,7 +30,7 @@ public class Enemy extends Entity {
 		getEnemyImage();
 		width = gp.tileSize;
 		height = gp.tileSize;
-		speed = 0.5 * gp.scale;
+		speed = 0.2 * gp.scale;
 		health = 150;
 		healthMax = health;
 		hitbox = new Rectangle();

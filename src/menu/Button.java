@@ -99,6 +99,13 @@ public class Button
 				this.height = (int)(f.getStringBounds(text, frc).getHeight());
 				screenX = gp.screenWidth/20;
 				screenY = gp.screenHeight/20 +(height + 5) * 2;
+				break;
+			case "RefreshRate":
+				this.width = (int) (f.getStringBounds(text, frc).getWidth());
+				this.height = (int)(f.getStringBounds(text, frc).getHeight());
+				screenX = gp.screenWidth/20;
+				screenY = gp.screenHeight/20 +(height + 5) * 3;
+				break;
         }
 	}
 
@@ -184,7 +191,7 @@ public class Button
 		}
 	}
 
-	public synchronized void draw(Graphics2D g2) 
+	public void draw(Graphics2D g2)
 	{
 		switch (name) 
 		{

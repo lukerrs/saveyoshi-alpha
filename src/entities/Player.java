@@ -29,7 +29,7 @@ public class Player extends Entity {
 		screenY = Camera.y - gp.tileSize/2;
 		width = gp.tileSize;
 		height = gp.tileSize;
-		speed = 1.5 * gp.scale;
+		speed = 0.5 * gp.scale;
 		health = 150;
 		healthMax = health;
 		direction = "stilldown";

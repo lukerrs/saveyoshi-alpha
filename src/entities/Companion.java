@@ -37,7 +37,7 @@ public class Companion extends Entity {
 		hitbox.y = (int) (40 * gp.scale);
 		hitbox.width = (int) (20 * gp.scale);
 		hitbox.height = (int) (24 * gp.scale);
-		speed = 1 * gp.scale;
+		speed = 0.5 * gp.scale;
 		rd = new Random();
 		randomize = true;
 		randomCounter = 0;
